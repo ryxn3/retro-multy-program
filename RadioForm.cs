@@ -1054,6 +1054,11 @@ sealed partial class RadioForm : Form
         float size = pitch * 0.8f;
         int fi = (int)(Math.Max(0, now - videoStart) * video.Fps) % video.Count;
         var frame = video.Frame(fi);
+        if (video.IsColor)
+        {
+            DrawColorVideo(g, ink, frame, x0, y0, pitch, size);
+            return;
+        }
         int max = video.MaxLevel;
 
         for (int y = 0; y < video.Height; y++)

@@ -76,6 +76,28 @@ sealed partial class RadioForm
     void ButtonClick() => clicks.Play(buttonSound, false, clickVolume / 10f);
     void KnobClick() => clicks.Play(knobSound, true, clickVolume / 10f);
 
+    // ───────────────────────────── color videos ─────────────────────────────
+
+    readonly List<RectangleF>[] colorDots = [.. Enumerable.Range(0, 256).Select(_ => new List<RectangleF>())];
+    readonly SolidBrush[] colorBrushes = [.. Enumerable.Range(0, 256).Select(v => new SolidBrush(RdvVideo.ColorOf(v)))];
+
+    /// <summary>A color .rdv: every dot in its own color, drawn in one batch per color (256 at most).</summary>
+    void DrawColorVideo(Graphics g, Inks ink, byte[] frame, float x0, float y0, float pitch, float size)
+    {
+        int w = video!.Width, h = video.Height;
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                int v = frame[y * w + x];
+                var r = new RectangleF(x0 + x * pitch, y0 + y * pitch, size, size);
+                if (v == 0) ghostDots.Add(r);
+                else colorDots[v].Add(r);
+            }
+        Fill(g, ink.Ghost, ghostDots);
+        for (int v = 1; v < 256; v++)
+            if (colorDots[v].Count > 0) Fill(g, colorBrushes[v], colorDots[v]);
+    }
+
     // ───────────────────────────── repainting ─────────────────────────────
 
     // 0 = AUTO (60 while playing, 30 when idle), 1 = always 60, 2 = always 30.

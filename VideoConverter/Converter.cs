@@ -15,7 +15,8 @@ sealed record ConvertOptions(
     float Contrast = 1f,     // 0.5..2
     bool Invert = false,
     double Start = 0,        // seconds
-    double Length = 0);      // seconds, 0 = to the end
+    double Length = 0,       // seconds, 0 = to the end
+    bool Color = false);     // full-color dots instead of one display color
 
 /// <summary>Turns ordinary video into radio display frames, using ffmpeg to decode.</summary>
 static class Converter
@@ -103,13 +104,15 @@ static class Converter
         return TimeSpan.TryParse(part, CultureInfo.InvariantCulture, out var ts) ? ts.TotalSeconds : null;
     }
 
-    /// <summary>One grayscale frame (W x H bytes) at the given time, or null.</summary>
-    public static byte[]? GrabFrame(string input, double seconds, FitMode fit)
+    static string PixFmt(bool color) => color ? "rgb24" : "gray";
+
+    /// <summary>One frame at the given time (W x H gray bytes, or W x H x 3 RGB bytes for color), or null.</summary>
+    public static byte[]? GrabFrame(string input, double seconds, FitMode fit, bool color = false)
     {
         using var p = StartFfmpeg(["-v", "error", "-ss", Num(seconds), "-i", input, "-frames:v", "1",
-            "-vf", ScaleFilter(fit) + ",format=gray", "-f", "rawvideo", "-pix_fmt", "gray", "-"]);
+            "-vf", ScaleFilter(fit) + ",format=" + PixFmt(color), "-f", "rawvideo", "-pix_fmt", PixFmt(color), "-"]);
         p.StandardError.ReadToEndAsync();
-        var buf = new byte[W * H];
+        var buf = new byte[W * H * (color ? 3 : 1)];
         int got = ReadFully(p.StandardOutput.BaseStream, buf);
         p.WaitForExit();
         return got == buf.Length ? buf : null;
@@ -138,7 +141,7 @@ static class Converter
         if (o.Start > 0) args.AddRange(["-ss", Num(o.Start)]);
         args.AddRange(["-i", input]);
         if (o.Length > 0) args.AddRange(["-t", Num(o.Length)]);
-        args.AddRange(["-an", "-vf", $"fps={o.Fps}," + ScaleFilter(o.Fit) + ",format=gray", "-f", "rawvideo", "-pix_fmt", "gray", "-"]);
+        args.AddRange(["-an", "-vf", $"fps={o.Fps}," + ScaleFilter(o.Fit) + ",format=" + PixFmt(o.Color), "-f", "rawvideo", "-pix_fmt", PixFmt(o.Color), "-"]);
 
         using var p = StartFfmpeg(args);
         var errTask = p.StandardError.ReadToEndAsync();
@@ -146,9 +149,9 @@ static class Converter
         int count;
         try
         {
-            using (var writer = new RdvVideo.Writer(tmp, W, H, Dither.BitsFor(o.Mode), o.Fps))
+            using (var writer = new RdvVideo.Writer(tmp, W, H, Dither.BitsFor(o), o.Fps))
             {
-                var buf = new byte[W * H];
+                var buf = new byte[W * H * (o.Color ? 3 : 1)];
                 while (ReadFully(p.StandardOutput.BaseStream, buf) == buf.Length)
                 {
                     if (ct.IsCancellationRequested)
@@ -187,6 +190,7 @@ static class Converter
                 "--mode" => o with { Mode = v switch { "ordered" => DitherMode.Ordered, "threshold" => DitherMode.Threshold, "gray4" => DitherMode.Gray4, _ => DitherMode.FloydSteinberg } },
                 "--length" => o with { Length = double.Parse(v, CultureInfo.InvariantCulture) },
                 "--start" => o with { Start = double.Parse(v, CultureInfo.InvariantCulture) },
+                "--color" => o with { Color = v is "on" or "1" or "true" or "yes" },
                 _ => o,
             };
         }
@@ -202,16 +206,94 @@ static class Converter
     }
 }
 
-/// <summary>Turns grayscale into the radio's 1-bit or 2-bit dots.</summary>
+/// <summary>Turns video frames into the radio's dots: 1-bit or 2-bit brightness, or RGB 3-3-2 color.</summary>
 static class Dither
 {
     static readonly int[,] Bayer4 = { { 0, 8, 2, 10 }, { 12, 4, 14, 6 }, { 3, 11, 1, 9 }, { 15, 7, 13, 5 } };
 
-    public static int BitsFor(DitherMode m) => m == DitherMode.Gray4 ? 2 : 1;
+    public static int BitsFor(ConvertOptions o) => o.Color ? RdvVideo.ColorBits : o.Mode == DitherMode.Gray4 ? 2 : 1;
 
-    public static byte[] Apply(byte[] gray, int w, int h, ConvertOptions o)
+    static float Tone(byte b, ConvertOptions o)
     {
-        int max = (1 << BitsFor(o.Mode)) - 1;
+        float v = b / 255f;
+        v = (v - 0.5f) * o.Contrast + 0.5f + o.Brightness;
+        if (o.Invert) v = 1 - v;
+        return Math.Clamp(v, 0, 1);
+    }
+
+    /// <summary>
+    /// A color frame (RGB bytes) to one RGB 3-3-2 byte per dot. Each channel is dithered to its few levels
+    /// (8 red, 8 green, 4 blue) with the chosen style, which keeps gradients smooth with only 256 colors.
+    /// </summary>
+    public static byte[] ApplyColor(byte[] rgb, int w, int h, ConvertOptions o)
+    {
+        int[] maxes = [7, 7, 3];
+        var ch = new float[3][];
+        for (int c = 0; c < 3; c++)
+        {
+            ch[c] = new float[w * h];
+            for (int i = 0; i < w * h; i++) ch[c][i] = Tone(rgb[i * 3 + c], o);
+        }
+        var q = new int[3][];
+        for (int c = 0; c < 3; c++)
+        {
+            int max = maxes[c];
+            var f = ch[c];
+            var r = q[c] = new int[w * h];
+            switch (o.Mode)
+            {
+                case DitherMode.Threshold:
+                    for (int i = 0; i < f.Length; i++) r[i] = Math.Clamp((int)MathF.Round(f[i] * max), 0, max);
+                    break;
+                case DitherMode.Ordered:
+                    for (int y = 0; y < h; y++)
+                        for (int x = 0; x < w; x++)
+                        {
+                            float t = (Bayer4[y & 3, x & 3] + 0.5f) / 16f;
+                            r[y * w + x] = Math.Clamp((int)(f[y * w + x] * max + t), 0, max);
+                        }
+                    break;
+                default:
+                    ErrorDiffuse(f, r, w, h, max);
+                    break;
+            }
+        }
+        var result = new byte[w * h];
+        for (int i = 0; i < result.Length; i++) result[i] = (byte)(q[0][i] << 5 | q[1][i] << 2 | q[2][i]);
+        return result;
+    }
+
+    /// <summary>Serpentine Floyd–Steinberg to max + 1 levels.</summary>
+    static void ErrorDiffuse(float[] f, int[] result, int w, int h, int max)
+    {
+        for (int y = 0; y < h; y++)
+        {
+            bool ltr = (y & 1) == 0;
+            int dir = ltr ? 1 : -1;
+            for (int k = 0; k < w; k++)
+            {
+                int x = ltr ? k : w - 1 - k;
+                int i = y * w + x;
+                float old = f[i];
+                int q = Math.Clamp((int)MathF.Round(old * max), 0, max);
+                result[i] = q;
+                float err = old - q / (float)max;
+                if (x + dir >= 0 && x + dir < w) f[i + dir] += err * 7 / 16f;
+                if (y + 1 < h)
+                {
+                    if (x - dir >= 0 && x - dir < w) f[i + w - dir] += err * 3 / 16f;
+                    f[i + w] += err * 5 / 16f;
+                    if (x + dir >= 0 && x + dir < w) f[i + w + dir] += err * 1 / 16f;
+                }
+            }
+        }
+    }
+
+    public static byte[] Apply(byte[] frame, int w, int h, ConvertOptions o)
+    {
+        if (o.Color) return ApplyColor(frame, w, h, o);
+        byte[] gray = frame;
+        int max = (1 << BitsFor(o)) - 1;
         var f = new float[w * h];
         for (int i = 0; i < f.Length; i++)
         {

@@ -16,7 +16,7 @@ sealed class ConverterForm : Form
     readonly DotPreview preview = new();
     readonly TrackBar trkTime = new(), trkBright = new(), trkContrast = new();
     readonly ComboBox cmbFit = new(), cmbFps = new(), cmbMode = new();
-    readonly CheckBox chkInvert = new();
+    readonly CheckBox chkInvert = new(), chkColor = new();
     readonly NumericUpDown numStart = new(), numLength = new();
     readonly Button btnBrowse = new(), btnSave = new(), btnConvert = new(), btnCancel = new(), btnPlay = new();
     readonly ProgressBar progress = new();
@@ -25,15 +25,16 @@ sealed class ConverterForm : Form
     readonly System.Windows.Forms.Timer anim = new();
 
     double duration;
-    byte[]? rawFrame;          // undithered grayscale at the scrub position
+    byte[]? rawFrame;          // undithered frame at the scrub position (gray, or RGB when color is on)
     FitMode rawFit;
+    bool rawColor;
     double rawTime = -1;
     List<byte[]>? clip;        // dithered preview clip while "Play preview" runs
     int clipPos;
     CancellationTokenSource? cts;
     bool busy;
 
-    public ConverterForm(string? initialFile)
+    public ConverterForm(string? initialFile, bool color = false)
     {
         Text = "Radio Video Converter";
         BackColor = Back;
@@ -86,7 +87,7 @@ sealed class ConverterForm : Form
         SetupCombo(cmbFps, 265, 360, 70, ["10", "12", "15", "20", "25", "30"]);
         cmbFps.SelectedIndex = 2;
         AddLabel("Style", 355, 364);
-        SetupCombo(cmbMode, 395, 360, 230, ["1-bit dither (smooth)", "1-bit pattern (retro)", "1-bit hard (high contrast)", "4-level gray dither"]);
+        SetupCombo(cmbMode, 395, 360, 230, ["Dither (smooth)", "Pattern (retro)", "Hard (high contrast)", "4-level gray dither"]);
         SetupButton(btnPlay, "▶  Play preview", 640, 358, 168);
         btnPlay.Click += (_, _) => TogglePlayPreview();
 
@@ -98,6 +99,12 @@ sealed class ConverterForm : Form
         chkInvert.Location = new Point(575, 402);
         chkInvert.AutoSize = true;
         chkInvert.CheckedChanged += (_, _) => Redraw();
+        chkColor.Text = "Color";
+        chkColor.Location = new Point(650, 402);
+        chkColor.AutoSize = true;
+        chkColor.ForeColor = Cyan;
+        chkColor.CheckedChanged += (_, _) => { StopClip(); debounce.Restart(); };
+        chkColor.Checked = color;
 
         AddLabel("Start (s)", 12, 450);
         SetupNum(numStart, 80, 447, 0, 36000, 0);
@@ -126,13 +133,13 @@ sealed class ConverterForm : Form
         lblStatus.Size = new Size(796, 40);
         lblStatus.ForeColor = Dim;
 
-        Controls.AddRange([title, subtitle, preview, trkTime, lblTime, chkInvert, lblInfo, progress, lblStatus]);
+        Controls.AddRange([title, subtitle, preview, trkTime, lblTime, chkInvert, chkColor, lblInfo, progress, lblStatus]);
 
         debounce.Tick += async (_, _) => { debounce.Stop(); await RefreshPreviewAsync(); };
         anim.Tick += (_, _) =>
         {
             if (clip == null || clip.Count == 0) return;
-            preview.SetFrame(clip[clipPos], Dither.BitsFor(CurrentOptions().Mode));
+            preview.SetFrame(clip[clipPos], Dither.BitsFor(CurrentOptions()));
             clipPos = (clipPos + 1) % clip.Count;
         };
 
@@ -221,7 +228,8 @@ sealed class ConverterForm : Form
         Contrast: trkContrast.Value / 100f,
         Invert: chkInvert.Checked,
         Start: (double)numStart.Value,
-        Length: (double)numLength.Value);
+        Length: (double)numLength.Value,
+        Color: chkColor.Checked);
 
     // ───────────────────────────── files ─────────────────────────────
 
@@ -295,17 +303,19 @@ sealed class ConverterForm : Form
     {
         if (txtInput.Text.Length == 0 || Converter.FfmpegPath == null) return;
         var fit = (FitMode)cmbFit.SelectedIndex;
+        bool color = chkColor.Checked;
         double t = ScrubSeconds;
-        if (rawFrame != null && rawFit == fit && Math.Abs(rawTime - t) < 0.01)
+        if (rawFrame != null && rawFit == fit && rawColor == color && Math.Abs(rawTime - t) < 0.01)
         {
             Redraw();
             return;
         }
         string input = txtInput.Text;
-        var frame = await Task.Run(() => Converter.GrabFrame(input, t, fit));
+        var frame = await Task.Run(() => Converter.GrabFrame(input, t, fit, color));
         if (frame == null) return;
         rawFrame = frame;
         rawFit = fit;
+        rawColor = color;
         rawTime = t;
         Redraw();
     }
@@ -314,7 +324,8 @@ sealed class ConverterForm : Form
     {
         if (clip != null || rawFrame == null) return;
         var o = CurrentOptions();
-        preview.SetFrame(Dither.Apply(rawFrame, Converter.W, Converter.H, o), Dither.BitsFor(o.Mode));
+        if (rawColor != o.Color) return; // the right kind of frame is on its way
+        preview.SetFrame(Dither.Apply(rawFrame, Converter.W, Converter.H, o), Dither.BitsFor(o));
     }
 
     void StopClip()
@@ -452,6 +463,11 @@ sealed class DotPreview : Control
         float pitch = Math.Min((Width - 16f) / w, (Height - 16f) / h);
         float x0 = (Width - pitch * w) / 2, y0 = (Height - pitch * h) / 2;
         float size = pitch * 0.78f;
+        if (bits == RdvVideo.ColorBits)
+        {
+            PaintColor(g, w, h, x0, y0, pitch, size);
+            return;
+        }
         int max = (1 << bits) - 1;
         var main = Color.FromArgb(110, 235, 255);
         var lists = new List<RectangleF>[max + 1];
@@ -472,6 +488,24 @@ sealed class DotPreview : Control
             using var f = new Font("Segoe UI", 11f);
             TextRenderer.DrawText(g, "Preview appears here", f, ClientRectangle, Color.FromArgb(90, 110, 235, 255),
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+        }
+    }
+
+    /// <summary>Color dots, one batch per color; black dots show as the faint unlit grid.</summary>
+    void PaintColor(Graphics g, int w, int h, float x0, float y0, float pitch, float size)
+    {
+        var lists = new List<RectangleF>?[256];
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                int v = levels![y * w + x];
+                (lists[v] ??= []).Add(new RectangleF(x0 + x * pitch, y0 + y * pitch, size, size));
+            }
+        for (int v = 0; v < 256; v++)
+        {
+            if (lists[v] == null) continue;
+            using var b = new SolidBrush(v == 0 ? Color.FromArgb(24, 110, 235, 255) : RdvVideo.ColorOf(v));
+            g.FillRectangles(b, lists[v]!.ToArray());
         }
     }
 }

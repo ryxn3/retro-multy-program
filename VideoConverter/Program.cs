@@ -5,16 +5,16 @@ static class Program
     [STAThread]
     static int Main(string[] args)
     {
-        // Command-line mode: RadioVideoConverter.exe input.mp4 output.rdv [--fit fill|fit|stretch] [--fps N] [--mode fs|ordered|threshold|gray4]
+        // Command-line mode: RadioVideoConverter.exe input.mp4 output.rdv [--fit fill|fit|stretch] [--fps N] [--mode fs|ordered|threshold|gray4] [--color on|off]
         if (args.Length >= 2 && !args[0].StartsWith("--"))
             return Converter.RunCommandLine(args);
 
         ApplicationConfiguration.Initialize();
 
-        // --snapshot out.png [video]: saves a screenshot of the window and exits (used for the launcher's pictures).
+        // --snapshot out.png [video] [color]: saves a screenshot of the window and exits (used for the launcher's pictures).
         if (args.Length >= 2 && args[0] == "--snapshot")
         {
-            var form = new ConverterForm(args.Length > 2 ? args[2] : null);
+            var form = new ConverterForm(args.Length > 2 ? args[2] : null, args.Length > 3 && args[3] == "color");
             form.Shown += async (_, _) =>
             {
                 await Task.Delay(4000);

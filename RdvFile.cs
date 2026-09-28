@@ -9,6 +9,8 @@ namespace RetroRadio;
 /// Layout: "RDV1", u16 width, u16 height, u8 bits per dot (1 or 2), u8 reserved,
 /// u16 fps x 100, u32 frame count, then a GZip stream of frames. Each frame is width x height
 /// dots, row by row, packed MSB-first at the given bit depth.
+/// Bits 1 or 2 are brightness levels; bits 8 is a color video with one RGB 3-3-2 byte per dot
+/// (8 reds x 8 greens x 4 blues, see <see cref="ColorOf"/>).
 /// </summary>
 sealed class RdvVideo
 {
@@ -23,6 +25,7 @@ sealed class RdvVideo
     public List<byte[]> Frames { get; }
 
     public int MaxLevel => (1 << Bits) - 1;
+    public bool IsColor => Bits == ColorBits;
     public int FrameBytes => FrameSize(Width, Height, Bits);
     public TimeSpan Duration => TimeSpan.FromSeconds(Frames.Count / Fps);
 
@@ -32,6 +35,13 @@ sealed class RdvVideo
     }
 
     public static int FrameSize(int w, int h, int bits) => (w * h * bits + 7) / 8;
+
+    public const int ColorBits = 8;
+
+    /// <summary>The color of an RGB 3-3-2 dot value.</summary>
+    public static Color ColorOf(int v) => Color.FromArgb((v >> 5 & 7) * 255 / 7, (v >> 2 & 7) * 255 / 7, (v & 3) * 255 / 3);
+
+    static bool ValidBits(int bits) => bits is 1 or 2 or ColorBits;
 
     /// <summary>Brightness level (0..MaxLevel) of one dot.</summary>
     public int Level(byte[] frame, int x, int y)
@@ -50,7 +60,7 @@ sealed class RdvVideo
         br.ReadByte();
         float fps = br.ReadUInt16() / 100f;
         int count = (int)br.ReadUInt32();
-        if (w == 0 || h == 0 || bits is not (1 or 2) || fps <= 0) throw new InvalidDataException("Corrupt .rdv header.");
+        if (w == 0 || h == 0 || !ValidBits(bits) || fps <= 0) throw new InvalidDataException("Corrupt .rdv header.");
 
         int size = FrameSize(w, h, bits);
         var frames = new List<byte[]>(count);
@@ -82,6 +92,7 @@ sealed class RdvVideo
         public float Fps { get; }
         public int Count { get; }
         public int MaxLevel => (1 << Bits) - 1;
+        public bool IsColor => Bits == ColorBits;
 
         public Player(string path)
         {
@@ -149,7 +160,7 @@ sealed class RdvVideo
         br.ReadByte();
         float fps = br.ReadUInt16() / 100f;
         int count = (int)br.ReadUInt32();
-        if (w == 0 || h == 0 || bits is not (1 or 2) || fps <= 0) throw new InvalidDataException("Corrupt .rdv header.");
+        if (w == 0 || h == 0 || !ValidBits(bits) || fps <= 0) throw new InvalidDataException("Corrupt .rdv header.");
         return (w, h, bits, fps, count);
     }
 
@@ -179,7 +190,7 @@ sealed class RdvVideo
 
         public int Count => count;
 
-        /// <summary>Adds a frame given one level (0..2^bits-1) per dot, row by row.</summary>
+        /// <summary>Adds a frame given one level (0..2^bits-1, or an RGB 3-3-2 byte for color) per dot, row by row.</summary>
         public void Add(byte[] levels)
         {
             var packed = new byte[FrameSize(w, h, bits)];

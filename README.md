@@ -122,6 +122,10 @@ Drag the `.rdv` onto the radio or pick it in SETTINGS → DISPLAY VIDEO; VIS swi
 dotnet run -c Release --project VideoConverter
 ```
 
+Tick **Color** in the converter for full-color videos: every dot gets its own color (256 colors,
+dithered so gradients stay smooth). Color videos need this version of Retro Radio; one-color
+videos keep working everywhere.
+
 ## SoundCloud / Spotify
 
 SETTINGS → MUSIC SERVICE picks SoundCloud or Spotify; SETTINGS → ONLINE MUSIC (or K) opens its menu.
