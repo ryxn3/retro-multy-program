@@ -165,16 +165,6 @@ the song playing in Retro Radio. Three styles (80s digital VFD, classic analog, 
 day/night lighting, colors, km/h or mph, sizes, always-on-top and a demo drive. Right-click for the
 menu; keys: S style, D demo, N day/night, U units, T on top, R reset trip.
 
-## JDM Garage (dekotora & JDM car collection)
-
-`JdmGarage/` is a neon-lit garage you drive through one vehicle at a time: AE86, Skyline R34, Supra,
-RX-7, NSX, Silvia, a bosozoku kaido racer with takeyari pipes, a Century VIP, a Cima, a kei van and
-three dekotora art trucks with hand-painted murals and chasing marker lights. Each vehicle has specs
-and its own radio fitted (one of Retro Radio's models, rendered live); **Enter / PLAY** opens Retro
-Radio with that radio (`--style N`). It finds Retro Radio next to itself, in the launcher's install
-folder or in a local build. Keys: ← → (or mouse wheel) drive the next one in, R random, N day/night.
-`JdmGarage.exe --snapshot out.png [car] [day|night] [scale]` renders a picture without a window.
-
 ## Launcher
 
 `Launcher/` is **Retro Multy Program**: it installs, updates and opens all the programs from the

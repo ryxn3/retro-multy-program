@@ -16,7 +16,6 @@ $apps = @(
     @{ Project = "RadioDesigner\RadioDesigner.csproj";       Zip = "RadioDesigner-win-x64.zip";       Extra = @("Radio Templates") },
     @{ Project = "RetroLens\RetroLens.csproj";                Zip = "RetroLens-win-x64.zip";           Extra = @() },
     @{ Project = "RetroDash\RetroDash.csproj";                Zip = "RetroDash-win-x64.zip";           Extra = @() },
-    @{ Project = "JdmGarage\JdmGarage.csproj";                Zip = "JdmGarage-win-x64.zip";           Extra = @() },
     @{ Project = "Launcher\RetroLauncher.csproj";            Zip = "RetroLauncher-win-x64.zip";       Extra = @() }
 )
 

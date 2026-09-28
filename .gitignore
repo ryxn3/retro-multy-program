@@ -12,3 +12,9 @@ dist/
 
 # Local tool settings
 .claude/
+
+# Kept locally, not published
+Icon Ideas/
+JdmGarage/
+Launcher/Images/garage.png
+docs/images/garage*.jpg

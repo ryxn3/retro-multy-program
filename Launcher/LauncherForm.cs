@@ -38,11 +38,6 @@ sealed class LauncherForm : Form
             "speedometer, memory is fuel. 80s digital, classic analog and modern styles, day and night lighting, " +
             "a demo drive, and it shows the song playing in Retro Radio.",
             "RetroDash-win-x64.zip", "RetroDash.exe", "dash.png"),
-        new("garage", "JDM Garage", "Dekotora & JDM car collection",
-            "Walk through a neon-lit garage of JDM legends and glowing dekotora art trucks — AE86, R34, Supra, RX-7, " +
-            "a bosozoku kaido racer, a kei van and more. Every vehicle has its own radio fitted: press play to open " +
-            "Retro Radio in that car's radio.",
-            "JdmGarage-win-x64.zip", "JdmGarage.exe", "garage.png"),
     ];
 
     const string LauncherAsset = "RetroLauncher-win-x64.zip";
