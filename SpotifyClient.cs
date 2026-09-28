@@ -178,10 +178,10 @@ sealed class SpotifyClient : IMusicService
         }
     }
 
-    sealed class NoDeviceException() : Exception("NO_ACTIVE_DEVICE");
+    internal sealed class NoDeviceException() : Exception("NO_ACTIVE_DEVICE");
 
     /// <summary>An API error whose status code the caller can react to; the message is for the display.</summary>
-    sealed class ApiException(int status, string message) : Exception(message)
+    internal sealed class ApiException(int status, string message) : Exception(message)
     {
         public int Status { get; } = status;
     }
@@ -378,7 +378,12 @@ sealed class SpotifyRemote(SpotifyClient client) : IPlayback
         }
     }
 
-    void Fire(Func<CancellationToken, Task> call)
+    /// <summary>
+    /// Sends a command. Only commands the listener asked for (play, pause, skip, seek) report failures;
+    /// the radio's own background syncing (shuffle, repeat, volume) fails silently, since there's nothing
+    /// to do about it and a message out of nowhere is just annoying.
+    /// </summary>
+    void Fire(Func<CancellationToken, Task> call, bool quiet = false)
     {
         // Optimistic UI: don't let a poll that raced the command undo it.
         ignoreUntil = DateTime.UtcNow.AddSeconds(1.5);
@@ -392,14 +397,37 @@ sealed class SpotifyRemote(SpotifyClient client) : IPlayback
             }
             catch (Exception ex)
             {
-                Error?.Invoke(ex is ServiceException s ? s.Message : ex is HttpRequestException ? "NO CONNECTION" : "SPOTIFY ERROR");
+                if (!quiet) Report(Describe(ex));
             }
         }
     }
 
+    string? lastError;
+    DateTime lastErrorAt;
+
+    /// <summary>Shows an error, but the same one at most once a minute.</summary>
+    void Report(string message)
+    {
+        if (message == lastError && DateTime.UtcNow - lastErrorAt < TimeSpan.FromMinutes(1)) return;
+        lastError = message;
+        lastErrorAt = DateTime.UtcNow;
+        Error?.Invoke(message);
+    }
+
+    static string Describe(Exception ex) => ex switch
+    {
+        ServiceException s => s.Message,
+        SpotifyClient.ApiException a => a.Message,
+        SpotifyClient.NoDeviceException => "OPEN SPOTIFY ON ONE OF YOUR DEVICES",
+        HttpRequestException => "NO CONNECTION",
+        OperationCanceledException => "SPOTIFY NOT RESPONDING",
+        _ => "SPOTIFY ERROR",
+    };
+
     /// <summary>Plays a whole playlist on Spotify; Spotify runs through it by itself.</summary>
     public async Task StartContextAsync(string contextUri)
     {
+        volumeRefused = false;
         Active = true;
         playing = true;
         progressMs = 0;
@@ -413,6 +441,7 @@ sealed class SpotifyRemote(SpotifyClient client) : IPlayback
 
     public async Task StartAsync(IReadOnlyList<string> uris, int offset, int durationHint)
     {
+        volumeRefused = false;
         Active = true;
         playing = true;
         progressMs = 0;
@@ -456,12 +485,16 @@ sealed class SpotifyRemote(SpotifyClient client) : IPlayback
         Fire(ct => client.SeekAsync(ms, ct));
     }
 
-    public void SetShuffle(bool on) => Fire(ct => client.ShuffleAsync(on, ct));
-    public void SetRepeat(string mode) => Fire(ct => client.RepeatAsync(mode, ct));
+    public void SetShuffle(bool on) => Fire(ct => client.ShuffleAsync(on, ct), quiet: true);
+    public void SetRepeat(string mode) => Fire(ct => client.RepeatAsync(mode, ct), quiet: true);
+
+    // Some devices (phones, some speakers) don't let apps change their volume; then we stop asking.
+    bool volumeRefused;
 
     /// <summary>Volume knob → Spotify volume, sent at most a few times a second.</summary>
     public void SetVolume(float v)
     {
+        if (volumeRefused) return;
         pendingVolume = (int)Math.Round(v * 100);
         if (volumeBusy) return;
         volumeBusy = true;
@@ -479,9 +512,13 @@ sealed class SpotifyRemote(SpotifyClient client) : IPlayback
                     await Task.Delay(250);
                 }
             }
-            catch (Exception ex)
+            catch (SpotifyClient.ApiException a) when (a.Status == 403)
             {
-                Error?.Invoke(ex is ServiceException s ? s.Message : "SPOTIFY ERROR");
+                volumeRefused = true; // this device's volume can't be controlled from here: stop trying
+            }
+            catch (Exception)
+            {
+                // Volume follows the knob in the background; a failure isn't worth interrupting the music for.
             }
             finally
             {

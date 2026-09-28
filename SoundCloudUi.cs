@@ -176,11 +176,14 @@ sealed partial class RadioForm
         }
     }
 
-    static string ScError(Exception ex) => ex switch
+    string ScError(Exception ex) => ex switch
     {
         ServiceException s => s.Message,
+        SpotifyClient.ApiException a => a.Message,
+        SpotifyClient.NoDeviceException => "OPEN SPOTIFY ON ONE OF YOUR DEVICES",
         HttpRequestException => "NO CONNECTION",
-        _ => "SOUNDCLOUD ERROR",
+        OperationCanceledException => "NOT RESPONDING - TRY AGAIN",
+        _ => serviceIdx == 1 ? "SPOTIFY ERROR" : "SOUNDCLOUD ERROR",
     };
 
     CancellationToken ScToken => scCts?.Token ?? CancellationToken.None;
