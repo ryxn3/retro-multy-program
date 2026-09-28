@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <AssemblyName>RetroLauncher</AssemblyName>
+    <RootNamespace>RetroLauncher</RootNamespace>
+    <Version>1.0.0</Version>
+    <Product>Retro Multy Program</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\DotFont.cs" Link="Shared\DotFont.cs" />
+    <Compile Include="..\ClassicFrame.cs" Link="Shared\ClassicFrame.cs" />
+    <EmbeddedResource Include="Images\*.png" />
+  </ItemGroup>
+
+</Project>

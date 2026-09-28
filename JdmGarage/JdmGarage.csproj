@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <AssemblyName>JdmGarage</AssemblyName>
+    <RootNamespace>JdmGarage</RootNamespace>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <!-- The radio models and their renderer, so every car shows the exact radio it opens. -->
+  <ItemGroup>
+    <Compile Include="..\RadioDesign.cs" Link="Shared\RadioDesign.cs" />
+    <Compile Include="..\BuiltInRadios.cs" Link="Shared\BuiltInRadios.cs" />
+    <Compile Include="..\BuiltInRadios2.cs" Link="Shared\BuiltInRadios2.cs" />
+    <Compile Include="..\FaceplateRenderer.cs" Link="Shared\FaceplateRenderer.cs" />
+    <Compile Include="..\Relief.cs" Link="Shared\Relief.cs" />
+    <Compile Include="..\DotFont.cs" Link="Shared\DotFont.cs" />
+    <Compile Include="..\ClassicFrame.cs" Link="Shared\ClassicFrame.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,413 @@
+{
+  "Name": "ROYAL 76",
+  "Brand": "ROYALTONE",
+  "Model": "RT-76  AUTOREVERSE",
+  "BrandFont": "Times New Roman",
+  "BrandSize": 14,
+  "BrandItalic": true,
+  "BrandAt": {
+    "X": 44,
+    "Y": 22
+  },
+  "BrandAlign": "Left",
+  "ModelAt": {
+    "X": 800,
+    "Y": 22
+  },
+  "ModelAlign": "Right",
+  "Width": 1040,
+  "Height": 300,
+  "Face": {
+    "X": 14,
+    "Y": 14,
+    "W": 1012,
+    "H": 272
+  },
+  "Corner": 3,
+  "Finish": "Plain",
+  "FaceMaterial": "Plastic",
+  "Face1": "#262628",
+  "Face2": "#1A1A1C",
+  "Face3": "#101011",
+  "Print": "#C8C8CD",
+  "BrandInk": "#E8E8EC",
+  "Trim": "#C8C8C8",
+  "ChromeTrim": true,
+  "Pinstripe": false,
+  "Bolts": false,
+  "Screen": "Vfd",
+  "Bezel": {
+    "X": 30,
+    "Y": 44,
+    "W": 419.84,
+    "H": 192.44
+  },
+  "BezelMaterial": "Gloss",
+  "Bezel1": "#141416",
+  "Bezel2": "#050506",
+  "BezelRim": "#A0A0A0",
+  "NeonBezel": false,
+  "GlassX": 44,
+  "GlassY": 58,
+  "DisplayWidth": 632,
+  "DisplayScale": 0.62,
+  "Palette": 2,
+  "KeyMaterial": "Chrome",
+  "Key1": "#F0F0EC",
+  "Key2": "#7E7E7A",
+  "KeyEdge": "#323232",
+  "KeyText": "#232323",
+  "TransportMaterial": "Chrome",
+  "Transport1": "#F0F0EC",
+  "Transport2": "#7E7E7A",
+  "TransportText": "#232323",
+  "DomeColor": "#2878FF",
+  "BacklitLabels": false,
+  "NightLight": "#78FF8C",
+  "NeonKeys": false,
+  "KnobMaterial": "Chrome",
+  "Knob1": "#ECECE8",
+  "Knob2": "#6E6E6A",
+  "Pointer": "#191919",
+  "GlowRings": false,
+  "Glow": "#2878FF",
+  "Led": "#FFAA28",
+  "Leds": [
+    {
+      "X": 52,
+      "Y": 226.44
+    },
+    {
+      "X": 415.84,
+      "Y": 226.44
+    }
+  ],
+  "TheftLed": {
+    "X": 846,
+    "Y": 40
+  },
+  "ShowSlot": true,
+  "Slot": {
+    "X": 484,
+    "Y": 74,
+    "W": 302,
+    "H": 5
+  },
+  "ShowIr": false,
+  "Ir": {
+    "X": 742,
+    "Y": 37,
+    "W": 26,
+    "H": 16
+  },
+  "ShowUsb": false,
+  "Usb": {
+    "X": 222,
+    "Y": 489,
+    "W": 40,
+    "H": 18
+  },
+  "ShowAux": true,
+  "Aux": {
+    "X": 990,
+    "Y": 254
+  },
+  "ShowSeam": false,
+  "Seam": {
+    "X": 30,
+    "Y": 37,
+    "W": 900,
+    "H": 2
+  },
+  "Beds": [
+    {
+      "X": 470,
+      "Y": 50,
+      "W": 330,
+      "H": 114,
+      "Radius": 4
+    }
+  ],
+  "Prints": [
+    {
+      "Text": "DOT MATRIX VFD  \u00B7  3D SPECTRUM ANALYZER",
+      "X": 30,
+      "Y": 223.44,
+      "W": 419.84,
+      "H": 10,
+      "Align": "Center",
+      "Size": 7
+    },
+    {
+      "Text": "AUTO REVERSE  \u00B7  DOLBY B NR  \u00B7  METAL",
+      "X": 480,
+      "Y": 144,
+      "W": 310,
+      "H": 14,
+      "Align": "Center",
+      "Size": 7.5
+    }
+  ],
+  "Keys": [
+    {
+      "Id": "SeekBack",
+      "Kind": "Chrome",
+      "X": 470,
+      "Y": 182,
+      "W": 50,
+      "H": 40,
+      "Label": "",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Prev",
+      "Kind": "Chrome",
+      "X": 526,
+      "Y": 182,
+      "W": 50,
+      "H": 40,
+      "Label": "",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Play",
+      "Kind": "Chrome",
+      "X": 582,
+      "Y": 182,
+      "W": 50,
+      "H": 40,
+      "Label": "",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Next",
+      "Kind": "Chrome",
+      "X": 638,
+      "Y": 182,
+      "W": 50,
+      "H": 40,
+      "Label": "",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "SeekFwd",
+      "Kind": "Chrome",
+      "X": 694,
+      "Y": 182,
+      "W": 50,
+      "H": 40,
+      "Label": "",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Eject",
+      "Kind": "Chrome",
+      "X": 750,
+      "Y": 182,
+      "W": 50,
+      "H": 40,
+      "Label": "",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Open",
+      "Kind": "Chrome",
+      "X": 44,
+      "Y": 244,
+      "W": 58,
+      "H": 26,
+      "Label": "OPEN",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Folder",
+      "Kind": "Chrome",
+      "X": 107.5,
+      "Y": 244,
+      "W": 58,
+      "H": 26,
+      "Label": "FOLDER",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "List",
+      "Kind": "Chrome",
+      "X": 171,
+      "Y": 244,
+      "W": 58,
+      "H": 26,
+      "Label": "LIST",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Settings",
+      "Kind": "Chrome",
+      "X": 234.5,
+      "Y": 244,
+      "W": 58,
+      "H": 26,
+      "Label": "SETTINGS",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Vis",
+      "Kind": "Chrome",
+      "X": 298,
+      "Y": 244,
+      "W": 58,
+      "H": 26,
+      "Label": "VIS",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Mute",
+      "Kind": "Chrome",
+      "X": 361.5,
+      "Y": 244,
+      "W": 58,
+      "H": 26,
+      "Label": "MUTE",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "VolUp",
+      "Kind": "Chrome",
+      "X": 425,
+      "Y": 244,
+      "W": 58,
+      "H": 26,
+      "Label": "VOL \u002B",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "VolDown",
+      "Kind": "Chrome",
+      "X": 488.5,
+      "Y": 244,
+      "W": 58,
+      "H": 26,
+      "Label": "VOL -",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Shuffle",
+      "Kind": "Chrome",
+      "X": 552,
+      "Y": 244,
+      "W": 58,
+      "H": 26,
+      "Label": "SHUF",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Repeat",
+      "Kind": "Chrome",
+      "X": 615.5,
+      "Y": 244,
+      "W": 58,
+      "H": 26,
+      "Label": "RPT",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Stop",
+      "Kind": "Chrome",
+      "X": 679,
+      "Y": 244,
+      "W": 58,
+      "H": 26,
+      "Label": "STOP",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Power",
+      "Kind": "Chrome",
+      "X": 742.5,
+      "Y": 244,
+      "W": 58,
+      "H": 26,
+      "Label": "POWER",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Knob",
+      "Kind": "Knob",
+      "X": 868,
+      "Y": 68,
+      "W": 88,
+      "H": 88,
+      "Label": "VOLUME",
+      "LabelAt": "Left",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "SpeedKnob",
+      "Kind": "Knob",
+      "X": 882,
+      "Y": 184,
+      "W": 60,
+      "H": 60,
+      "Label": "SPEED",
+      "LabelAt": "Left",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    }
+  ]
+}

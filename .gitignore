@@ -1,0 +1,14 @@
+# Build output
+bin/
+obj/
+dist/
+
+# Editor and user files
+.vs/
+.vscode/
+*.user
+*.suo
+.DS_Store
+
+# Local tool settings
+.claude/

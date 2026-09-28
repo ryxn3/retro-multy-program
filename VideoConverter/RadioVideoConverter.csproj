@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <Version>1.0.0</Version>
+    <AssemblyName>RadioVideoConverter</AssemblyName>
+    <RootNamespace>RadioVideoConverter</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Same .rdv format code as the radio. -->
+  <ItemGroup>
+    <Compile Include="..\RdvFile.cs" Link="RdvFile.cs" />
+    <Compile Include="..\ClassicFrame.cs" Link="ClassicFrame.cs" />
+  </ItemGroup>
+
+</Project>

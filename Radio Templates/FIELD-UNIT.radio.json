@@ -1,0 +1,413 @@
+{
+  "Name": "FIELD UNIT",
+  "Brand": "FIELDCOM",
+  "Model": "FX-1  RUGGED",
+  "BrandFont": "Consolas",
+  "BrandSize": 18,
+  "BrandItalic": false,
+  "BrandAt": {
+    "X": 44,
+    "Y": 20
+  },
+  "BrandAlign": "Left",
+  "ModelAt": {
+    "X": 560,
+    "Y": 24
+  },
+  "ModelAlign": "Right",
+  "Width": 760,
+  "Height": 640,
+  "Face": {
+    "X": 14,
+    "Y": 14,
+    "W": 732,
+    "H": 612
+  },
+  "Corner": 14,
+  "Finish": "Matte",
+  "FaceMaterial": "Plastic",
+  "Face1": "#686E4E",
+  "Face2": "#4E5438",
+  "Face3": "#343826",
+  "Print": "#E8E2BE",
+  "BrandInk": "#F0EBC8",
+  "Trim": "#C8BE8C",
+  "ChromeTrim": false,
+  "Pinstripe": false,
+  "Bolts": true,
+  "Screen": "Vfd",
+  "Bezel": {
+    "X": 41,
+    "Y": 48,
+    "W": 678,
+    "H": 282.9
+  },
+  "BezelMaterial": "Plastic",
+  "Bezel1": "#20221A",
+  "Bezel2": "#090907",
+  "BezelRim": "#5C6248",
+  "NeonBezel": false,
+  "GlassX": 57,
+  "GlassY": 64,
+  "DisplayWidth": 680,
+  "DisplayScale": 0.95,
+  "Palette": 3,
+  "KeyMaterial": "Rubber",
+  "Key1": "#484C3A",
+  "Key2": "#282A1E",
+  "KeyEdge": "#14160E",
+  "KeyText": "#E8E2BE",
+  "TransportMaterial": "Rubber",
+  "Transport1": "#484C3A",
+  "Transport2": "#282A1E",
+  "TransportText": "#E8E2BE",
+  "DomeColor": "#2878FF",
+  "BacklitLabels": false,
+  "NightLight": "#78FF78",
+  "NeonKeys": false,
+  "KnobMaterial": "Rubber",
+  "Knob1": "#3E4034",
+  "Knob2": "#181914",
+  "Pointer": "#FFC83C",
+  "GlowRings": false,
+  "Glow": "#2878FF",
+  "Led": "#78FF78",
+  "Leds": [
+    {
+      "X": 65,
+      "Y": 319.9
+    },
+    {
+      "X": 683,
+      "Y": 319.9
+    }
+  ],
+  "TheftLed": {
+    "X": 716,
+    "Y": 350
+  },
+  "ShowSlot": false,
+  "Slot": {
+    "X": 330,
+    "Y": 42,
+    "W": 300,
+    "H": 6
+  },
+  "ShowIr": false,
+  "Ir": {
+    "X": 742,
+    "Y": 37,
+    "W": 26,
+    "H": 16
+  },
+  "ShowUsb": true,
+  "Usb": {
+    "X": 624,
+    "Y": 595,
+    "W": 44,
+    "H": 18
+  },
+  "ShowAux": true,
+  "Aux": {
+    "X": 604,
+    "Y": 604
+  },
+  "ShowSeam": false,
+  "Seam": {
+    "X": 30,
+    "Y": 37,
+    "W": 900,
+    "H": 2
+  },
+  "Beds": [
+    {
+      "X": 46,
+      "Y": 338,
+      "W": 510,
+      "H": 250,
+      "Radius": 10
+    }
+  ],
+  "Prints": [
+    {
+      "Text": "DOT MATRIX VFD  \u00B7  3D SPECTRUM ANALYZER",
+      "X": 41,
+      "Y": 315.9,
+      "W": 678,
+      "H": 12,
+      "Align": "Center",
+      "Size": 7
+    },
+    {
+      "Text": "WATERPROOF  \u00B7  SHOCKPROOF  \u00B7  MIL-SPEC",
+      "X": 46,
+      "Y": 592,
+      "W": 510,
+      "H": 16,
+      "Align": "Center",
+      "Size": 7.5
+    }
+  ],
+  "Keys": [
+    {
+      "Id": "Open",
+      "Kind": "Rubber",
+      "X": 60,
+      "Y": 350,
+      "W": 110,
+      "H": 44,
+      "Label": "OPEN",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Folder",
+      "Kind": "Rubber",
+      "X": 182,
+      "Y": 350,
+      "W": 110,
+      "H": 44,
+      "Label": "FOLDER",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "List",
+      "Kind": "Rubber",
+      "X": 304,
+      "Y": 350,
+      "W": 110,
+      "H": 44,
+      "Label": "LIST",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Settings",
+      "Kind": "Rubber",
+      "X": 426,
+      "Y": 350,
+      "W": 110,
+      "H": 44,
+      "Label": "SETTINGS",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Vis",
+      "Kind": "Rubber",
+      "X": 60,
+      "Y": 406,
+      "W": 110,
+      "H": 44,
+      "Label": "VIS",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Mute",
+      "Kind": "Rubber",
+      "X": 182,
+      "Y": 406,
+      "W": 110,
+      "H": 44,
+      "Label": "MUTE",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "VolUp",
+      "Kind": "Rubber",
+      "X": 304,
+      "Y": 406,
+      "W": 110,
+      "H": 44,
+      "Label": "VOL \u002B",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "VolDown",
+      "Kind": "Rubber",
+      "X": 426,
+      "Y": 406,
+      "W": 110,
+      "H": 44,
+      "Label": "VOL -",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Shuffle",
+      "Kind": "Rubber",
+      "X": 60,
+      "Y": 462,
+      "W": 110,
+      "H": 44,
+      "Label": "SHUF",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Repeat",
+      "Kind": "Rubber",
+      "X": 182,
+      "Y": 462,
+      "W": 110,
+      "H": 44,
+      "Label": "RPT",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Stop",
+      "Kind": "Rubber",
+      "X": 304,
+      "Y": 462,
+      "W": 110,
+      "H": 44,
+      "Label": "STOP",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Power",
+      "Kind": "Rubber",
+      "X": 426,
+      "Y": 462,
+      "W": 110,
+      "H": 44,
+      "Label": "POWER",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "SeekBack",
+      "Kind": "Rubber",
+      "X": 60,
+      "Y": 530,
+      "W": 90,
+      "H": 46,
+      "Label": "SEEK",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Prev",
+      "Kind": "Rubber",
+      "X": 158,
+      "Y": 530,
+      "W": 90,
+      "H": 46,
+      "Label": "",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Play",
+      "Kind": "Rubber",
+      "X": 256,
+      "Y": 530,
+      "W": 90,
+      "H": 46,
+      "Label": "",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Next",
+      "Kind": "Rubber",
+      "X": 354,
+      "Y": 530,
+      "W": 90,
+      "H": 46,
+      "Label": "",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "SeekFwd",
+      "Kind": "Rubber",
+      "X": 452,
+      "Y": 530,
+      "W": 90,
+      "H": 46,
+      "Label": "SEEK",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Eject",
+      "Kind": "Rubber",
+      "X": 604,
+      "Y": 20,
+      "W": 80,
+      "H": 24,
+      "Label": "EJECT",
+      "LabelAt": "On",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "Knob",
+      "Kind": "Knob",
+      "X": 576,
+      "Y": 354,
+      "W": 128,
+      "H": 128,
+      "Label": "VOLUME",
+      "LabelAt": "Below",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    },
+    {
+      "Id": "SpeedKnob",
+      "Kind": "Knob",
+      "X": 612,
+      "Y": 518,
+      "W": 56,
+      "H": 56,
+      "Label": "SPEED",
+      "LabelAt": "Right",
+      "Tilt": 0,
+      "Mirror": false,
+      "Icon": ""
+    }
+  ]
+}

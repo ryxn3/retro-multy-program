@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retro Multy Program</title>
+<meta name="description" content="A car-stereo music player, a radio designer, a retro photo & video editor, car gauges for your PC and more — all installed and updated by one small launcher. Free for Windows.">
+<meta property="og:title" content="Retro Multy Program">
+<meta property="og:description" content="Retro car-stereo music player and friends for Windows. One launcher installs and updates them all.">
+<meta property="og:image" content="images/radio.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23071012'/%3E%3Cg fill='%235df2dc'%3E%3Crect x='5' y='18' width='4' height='9'/%3E%3Crect x='11' y='10' width='4' height='17'/%3E%3Crect x='17' y='14' width='4' height='13'/%3E%3Crect x='23' y='6' width='4' height='21'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0c;
+    --metal-hi: #d9dce1;
+    --metal-lo: #5b5f66;
+    --plate: #1a1b1f;
+    --plate-edge: #2c2e34;
+    --text: #e6e2d8;
+    --dim: #9a978f;
+    --vfd: #5df2dc;
+    --vfd-dim: rgba(93, 242, 220, .08);
+    --amber: #ffb43c;
+    --red: #ff4b3a;
+    --pink: #ff4fa3;
+    --glow: 0 0 6px rgba(93, 242, 220, .9), 0 0 18px rgba(93, 242, 220, .45);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1000px 500px at 50% -120px, rgba(255, 79, 163, .16), transparent 70%),
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, .018) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, .018) 0 1px, transparent 1px 64px),
+      var(--bg);
+    color: var(--text);
+    font: 17px/1.6 "Share Tech Mono", ui-monospace, monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* CRT scanlines and vignette over everything */
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 100;
+    background:
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, .16) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, .45));
+  }
+  a { color: var(--vfd); }
+  img { max-width: 100%; height: auto; display: block; }
+  .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+  .vt { font-family: VT323, monospace; }
+
+  /* ── chrome 80s lettering ── */
+  .chrome {
+    font-family: Audiowide, sans-serif; font-weight: 400; letter-spacing: .02em; line-height: 1.05;
+    background: linear-gradient(180deg, #fff 0%, #cfe6ff 38%, #3b3f4a 50%, #ffd9ef 54%, #ff7fc0 78%, #fff 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 2px 0 #1b0b14) drop-shadow(0 0 14px rgba(255, 79, 163, .35));
+  }
+  .label {
+    font-family: Audiowide, sans-serif; font-size: 12px; letter-spacing: .28em; text-transform: uppercase; color: var(--dim);
+  }
+
+  /* ── hardware: brushed metal, screws, rubber buttons, LEDs ── */
+  .metal {
+    background:
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, .05) 0 1px, rgba(0, 0, 0, .04) 1px 2px, transparent 2px 3px),
+      linear-gradient(180deg, #c9ccd2 0%, #9da1a8 45%, #7d8189 55%, #a8acb3 100%);
+    border: 1px solid #3a3d44;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 -2px 0 rgba(0, 0, 0, .35), 0 24px 60px rgba(0, 0, 0, .6);
+  }
+  .plate {
+    position: relative; background: linear-gradient(180deg, #202127, #16171b); border: 1px solid var(--plate-edge);
+    border-radius: 10px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 18px 40px rgba(0, 0, 0, .5);
+  }
+  .screws::before, .screws::after, .screws > .s1, .screws > .s2 {
+    content: ""; position: absolute; width: 11px; height: 11px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #f2f3f5, #7c8089 55%, #2b2d33);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .6);
+  }
+  .screws::before { top: 9px; left: 9px; }
+  .screws::after { top: 9px; right: 9px; }
+  .screws > .s1 { bottom: 9px; left: 9px; }
+  .screws > .s2 { bottom: 9px; right: 9px; }
+  .screws > .s1::after, .screws > .s2::after, .screw-slot { content: ""; }
+
+  .key {
+    display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px 11px; border-radius: 7px;
+    font-family: Audiowide, sans-serif; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; text-decoration: none;
+    color: #d8d6cf; background: linear-gradient(180deg, #34363d, #1d1e23);
+    border: 1px solid #0c0c0e; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 3px 0 #0b0b0d, 0 5px 10px rgba(0, 0, 0, .5);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .key:hover { color: #fff; }
+  .key:active { transform: translateY(3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 0 0 #0b0b0d, 0 2px 4px rgba(0, 0, 0, .5); }
+  .led { width: 7px; height: 7px; border-radius: 50%; background: #1b3d38; box-shadow: inset 0 1px 1px rgba(0, 0, 0, .6); flex: none; }
+  .key:hover .led, .led.on { background: var(--vfd); box-shadow: var(--glow); }
+  .led.amber { background: var(--amber); box-shadow: 0 0 6px var(--amber), 0 0 14px rgba(255, 180, 60, .5); }
+  .key.big {
+    font-size: 17px; padding: 18px 26px 17px; color: #03201c;
+    background: linear-gradient(180deg, #8ffbea, #33cdb8 60%, #229e8c);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 4px 0 #0f5047, 0 0 26px rgba(93, 242, 220, .45);
+  }
+  .key.big:hover { color: #000; }
+  .key.big:active { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 0 0 #0f5047, 0 0 18px rgba(93, 242, 220, .4); }
+
+  /* ── the head unit (hero) ── */
+  .hero { padding: 46px 0 30px; }
+  .headunit {
+    position: relative; border-radius: 18px; padding: 22px 26px 20px;
+    display: grid; grid-template-columns: 150px 1fr; gap: 24px; align-items: center;
+  }
+  .brandline { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: -4px 4px 0; }
+  .brandline .model { font-family: Audiowide, sans-serif; font-size: 13px; letter-spacing: .3em; color: #2b2e35; text-shadow: 0 1px 0 rgba(255, 255, 255, .5); }
+  .brandline .model b { color: #b3141e; }
+  .knob {
+    width: 132px; height: 132px; border-radius: 50%; position: relative; margin: auto;
+    background: conic-gradient(from 200deg, #2a2c31, #6c7078, #2a2c31, #50535a, #2a2c31);
+    box-shadow: 0 0 0 7px #202226, 0 0 0 9px #4a4d54, 0 10px 18px rgba(0, 0, 0, .55), inset 0 2px 3px rgba(255, 255, 255, .25);
+  }
+  .knob::before { content: ""; position: absolute; inset: 18%; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #4a4d55, #16171a 70%); box-shadow: inset 0 -2px 4px rgba(0, 0, 0, .7); }
+  .knob .mark { position: absolute; left: 50%; top: 9%; width: 4px; height: 17%; margin-left: -2px; border-radius: 2px; background: var(--vfd); box-shadow: var(--glow); transform-origin: 50% 240%; transform: rotate(var(--angle, 30deg)); }
+  .knob-label { text-align: center; margin-top: 16px; font-family: Audiowide, sans-serif; font-size: 11px; letter-spacing: .3em; color: #2b2e35; text-shadow: 0 1px 0 rgba(255, 255, 255, .5); }
+  .display {
+    background: linear-gradient(#030809, #010304); border-radius: 10px; padding: 14px 16px 10px;
+    border: 2px solid #111; box-shadow: inset 0 0 30px rgba(0, 0, 0, .9), 0 1px 0 rgba(255, 255, 255, .6);
+    position: relative; overflow: hidden;
+  }
+  .display::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255, 255, 255, .07) 0 30%, transparent 30%); pointer-events: none; }
+  .display .row { display: flex; justify-content: space-between; font-family: VT323, monospace; font-size: 22px; color: var(--vfd); text-shadow: var(--glow); line-height: 1; margin-bottom: 8px; }
+  .display .row .tag { background: var(--vfd); color: #031412; padding: 0 5px; text-shadow: none; }
+  .display .row .amber { color: var(--amber); text-shadow: 0 0 6px rgba(255, 180, 60, .8); }
+  #dotTitle { width: 100%; height: auto; }
+  #spectrum { width: 100%; height: 78px; margin-top: 6px; }
+  .keys { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 4px; }
+  .meta { text-align: center; margin-top: 18px; color: var(--dim); font-size: 15px; min-height: 24px; }
+  .meta b { color: var(--amber); font-weight: 400; }
+  .lead { max-width: 760px; margin: 30px auto 0; text-align: center; font-size: 19px; color: #cfcabe; }
+  @media (max-width: 720px) {
+    .headunit { grid-template-columns: 1fr; padding: 18px 14px; }
+    .knob-wrap { display: none; }
+    .brandline .model:last-child { display: none; }
+  }
+
+  /* ── now playing ticker ── */
+  .ticker { background: #020405; border-block: 2px solid #15181b; overflow: hidden; white-space: nowrap; padding: 8px 0 6px; }
+  .ticker span { display: inline-block; padding-left: 100%; font-family: VT323, monospace; font-size: 26px; color: var(--vfd); text-shadow: var(--glow); animation: tick 38s linear infinite; }
+  .ticker em { color: var(--amber); font-style: normal; text-shadow: 0 0 6px rgba(255, 180, 60, .8); }
+  @keyframes tick { to { transform: translateX(-100%); } }
+
+  /* ── sections ── */
+  section { padding: 64px 0; }
+  h2 { font-size: clamp(30px, 5vw, 52px); margin: 8px 0 14px; }
+  .sub { color: #bdb8ab; max-width: 660px; margin: 0 0 34px; }
+
+  .launcher { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center; }
+  .launcher > * { min-width: 0; }
+  .launcher ul { list-style: none; padding: 0; margin: 22px 0 0; display: grid; gap: 12px; }
+  .launcher li { display: flex; gap: 14px; align-items: baseline; color: #cfcabe; }
+  .launcher li .led { transform: translateY(-2px); }
+  @media (max-width: 860px) { .launcher { grid-template-columns: 1fr; } }
+
+  /* screenshot in a CRT monitor */
+  .crt { border-radius: 16px; padding: 18px; background: linear-gradient(180deg, #d8d2c2, #b1aa98); box-shadow: inset 0 2px 0 rgba(255, 255, 255, .6), inset 0 -3px 0 rgba(0, 0, 0, .25), 0 26px 60px rgba(0, 0, 0, .6); }
+  .crt .glass { position: relative; border-radius: 12px; overflow: hidden; background: #000; box-shadow: inset 0 0 0 3px #26241f; }
+  .crt .glass::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px), radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, .12), transparent 55%), radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, .55)); }
+  .crt .badge { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding: 0 4px; font-family: Audiowide, sans-serif; font-size: 11px; letter-spacing: .25em; color: #5b5547; }
+  .crt .badge .led { margin-left: 8px; }
+
+  .apps { display: grid; gap: 28px; }
+  .app { display: grid; grid-template-columns: 1.15fr 1fr; gap: 0; overflow: hidden; }
+  .app > * { min-width: 0; }
+  .app:nth-child(even) { grid-template-columns: 1fr 1.15fr; }
+  .app:nth-child(even) .shot { order: 2; }
+  .app .shot { padding: 22px; display: grid; align-content: center; background: repeating-linear-gradient(45deg, #111215 0 10px, #141519 10px 20px); }
+  .app .shot img { border-radius: 6px; border: 2px solid #050506; box-shadow: 0 10px 26px rgba(0, 0, 0, .6); }
+  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .gallery img:first-child { grid-column: 1 / -1; }
+  .app .body { padding: 34px 34px 30px; display: flex; flex-direction: column; }
+  .strip { font-family: VT323, monospace; font-size: 34px; line-height: 1; color: var(--vfd); text-shadow: var(--glow); background: #020405; border: 2px solid #0c0d0f; border-radius: 6px; padding: 8px 12px 6px; box-shadow: inset 0 0 14px rgba(0, 0, 0, .9); display: flex; justify-content: space-between; gap: 10px; }
+  .strip .num { color: var(--amber); text-shadow: 0 0 6px rgba(255, 180, 60, .8); }
+  .app .tag { font-family: Audiowide, sans-serif; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--pink); margin: 14px 0 10px; }
+  .app p { color: #cfcabe; margin: 0 0 16px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; padding: 0; list-style: none; }
+  .chips li { font-size: 14px; color: #d9d4c7; background: #0f1012; border: 1px solid #2e3036; border-radius: 4px; padding: 2px 9px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05); }
+  .app .dl { margin-top: auto; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: var(--dim); font-size: 14px; }
+  @media (max-width: 860px) {
+    .app, .app:nth-child(even) { grid-template-columns: 1fr; }
+    .app:nth-child(even) .shot { order: 0; }
+    .app .body { padding: 26px 20px 30px; }
+    .app .shot { padding: 14px; }
+  }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .step { padding: 30px 26px 26px; }
+  .seg { font-family: VT323, monospace; font-size: 86px; line-height: .8; color: var(--red); text-shadow: 0 0 8px rgba(255, 75, 58, .9), 0 0 24px rgba(255, 75, 58, .5); position: relative; display: inline-block; }
+  .seg::before { content: "88"; position: absolute; inset: 0; color: rgba(255, 75, 58, .08); text-shadow: none; }
+  .step h3 { font-family: Audiowide, sans-serif; font-weight: 400; font-size: 20px; margin: 14px 0 6px; letter-spacing: .04em; }
+  .step p { margin: 0; color: #bdb8ab; font-size: 16px; }
+  @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+  .warn { margin-top: 22px; padding: 14px 18px; display: flex; gap: 14px; align-items: baseline; border: 1px dashed rgba(255, 180, 60, .5); border-radius: 8px; color: #e8d3aa; background: rgba(255, 180, 60, .05); }
+
+  .menu { padding: 26px 24px; }
+  .menu details { border-bottom: 1px solid #25272c; }
+  .menu details:last-child { border-bottom: 0; }
+  .menu summary { cursor: pointer; list-style: none; display: flex; gap: 14px; align-items: center; padding: 14px 4px; font-family: VT323, monospace; font-size: 26px; line-height: 1.1; color: var(--vfd); text-shadow: 0 0 6px rgba(93, 242, 220, .5); }
+  .menu summary::-webkit-details-marker { display: none; }
+  .menu summary::before { content: "\25B6"; font-size: 15px; color: var(--amber); transition: transform .15s; }
+  .menu details[open] summary::before { transform: rotate(90deg); }
+  .menu summary:hover { background: rgba(93, 242, 220, .06); }
+  .menu details p { margin: 0 0 16px 32px; color: #cfcabe; }
+
+  footer { padding: 34px 0 50px; color: var(--dim); font-size: 14px; border-top: 1px solid #1d1f23; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 28px; justify-content: space-between; align-items: center; }
+
+  :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .ticker span { animation: none; padding-left: 16px; }
+    .key { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ticker" aria-hidden="true"><span>&#9835; NOW PLAYING: RETRO MULTY PROGRAM &nbsp;<em>&#9733;</em>&nbsp; RETRO RADIO &nbsp;<em>&#9733;</em>&nbsp; RETRO DASH &nbsp;<em>&#9733;</em>&nbsp; RETRO LENS &nbsp;<em>&#9733;</em>&nbsp; RADIO DESIGNER &nbsp;<em>&#9733;</em>&nbsp; VIDEO CONVERTER &nbsp;<em>&#9733;</em>&nbsp; FREE FOR WINDOWS 10 / 11 &nbsp;<em>&#9733;</em>&nbsp; ONE LAUNCHER INSTALLS &amp; UPDATES THEM ALL &nbsp;<em>&#9733;</em>&nbsp; P-TIME 00'00</span></div>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <h1 class="chrome" style="position:absolute;left:-9999px">Retro Multy Program</h1>
+    <div class="headunit metal">
+      <div class="brandline"><span class="model">RETRO<b>&#9679;</b>MULTY</span><span class="model">DIGITAL SIGNAL PROCESSOR &middot; RMP-1000</span></div>
+      <div class="knob-wrap">
+        <div class="knob" id="knob"><span class="mark"></span></div>
+        <div class="knob-label">VOLUME</div>
+      </div>
+      <div class="display">
+        <div class="row"><span><span class="tag">MP3</span> -01 &#9654;</span><span class="amber" id="ptime">P-TIME 00'00</span></div>
+        <canvas id="dotTitle" width="1400" height="150" role="img" aria-label="Retro Multy Program"></canvas>
+        <canvas id="spectrum" width="1400" height="160" aria-hidden="true"></canvas>
+      </div>
+      <nav class="keys" aria-label="Sections">
+        <a class="key big" id="dlLauncher" href="https://github.com/ryxn3/retro-multy-program/releases/latest/download/RetroLauncher-win-x64.zip"><span class="led amber"></span>Download launcher</a>
+        <a class="key" href="https://github.com/ryxn3/retro-multy-program/releases/latest/download/RetroRadio-macOS-arm64.zip"><span class="led"></span>Radio for Mac</a>
+        <a class="key" href="#programs"><span class="led"></span>Programs</a>
+        <a class="key" href="#install"><span class="led"></span>Install</a>
+        <a class="key" href="#faq"><span class="led"></span>FAQ</a>
+        <a class="key" href="https://github.com/ryxn3/retro-multy-program"><span class="led"></span>GitHub</a>
+      </nav>
+    </div>
+    <div class="meta" id="releaseMeta">FREE &middot; WINDOWS 10 / 11 (64-BIT) &middot; NOTHING ELSE TO INSTALL</div>
+    <p class="lead">A car-stereo music player, a radio designer, a retro photo &amp; video editor, car gauges for your PC and more. One small launcher installs them, keeps them updated and opens them.</p>
+  </div>
+</header>
+
+<section id="launcher">
+  <div class="wrap launcher">
+    <div>
+      <div class="label">Retro Multy Program</div>
+      <h2 class="chrome">One launcher for everything</h2>
+      <p class="sub">Download the launcher once. It shows every program with pictures, installs the ones you want with one click and tells you when there's an update.</p>
+      <ul>
+        <li><span class="led on"></span>Installs straight from the official GitHub releases</li>
+        <li><span class="led on"></span>Checks for updates to every program, and to itself</li>
+        <li><span class="led on"></span>Opens, updates or removes programs from one window</li>
+        <li><span class="led on"></span>New programs show up automatically when they're released</li>
+      </ul>
+    </div>
+    <div class="crt">
+      <div class="glass"><img src="images/launcher.png" alt="The Retro Multy Program launcher listing the programs with Install buttons" width="1080" height="880" loading="lazy"></div>
+      <div class="badge"><span>RMP COLOR MONITOR</span><span>POWER<span class="led on" style="display:inline-block"></span></span></div>
+    </div>
+  </div>
+</section>
+
+<section id="programs">
+  <div class="wrap">
+    <div class="label">The programs</div>
+    <h2 class="chrome">Pick what you like, or get them all</h2>
+    <p class="sub">Each program works on its own, and they work together. Videos from the converter play on the radio, the designer builds new radios for it, and the dash shows what the radio is playing.</p>
+
+    <div class="apps">
+      <article class="app plate screws"><i class="s1"></i><i class="s2"></i>
+        <div class="shot"><img src="images/radio.png" alt="Retro Radio showing a dot-matrix spectrum analyzer on a car stereo" width="900" height="560" loading="lazy"></div>
+        <div class="body">
+          <div class="strip"><span>RETRO RADIO</span><span class="num">CH 01</span></div>
+          <div class="tag">The music player</div>
+          <p>A car-stereo music player with a glowing dot-matrix display, spectrum analyzers, P-TIME, a volume wedge and knobs you can turn. It plays your music files, SoundCloud and Spotify, with synced lyrics.</p>
+          <ul class="chips"><li>39 radio models</li><li>Modern screens with album art</li><li>Day &amp; night lighting</li><li>EQ, crossfade &amp; reverb</li><li>Internet radio</li><li>Spotify &amp; SoundCloud</li><li>Synced lyrics</li><li>JDM voice &amp; sounds</li><li>8 languages</li></ul>
+          <div class="dl"><a class="key" data-asset="RetroRadio-win-x64.zip" href="https://github.com/ryxn3/retro-multy-program/releases/latest/download/RetroRadio-win-x64.zip"><span class="led"></span>Windows</a><a class="key" data-asset="RetroRadio-macOS-arm64.zip" href="https://github.com/ryxn3/retro-multy-program/releases/latest/download/RetroRadio-macOS-arm64.zip"><span class="led"></span>Mac (Apple Silicon)</a></div>
+        </div>
+      </article>
+
+      <article class="app plate screws"><i class="s1"></i><i class="s2"></i>
+        <div class="shot">
+          <div class="gallery">
+            <img src="images/dash.png" alt="Retro Dash classic analog cluster at night with orange backlit dials" width="1500" height="600" loading="lazy">
+            <img src="images/dash-digital.png" alt="Retro Dash 80s digital cluster with a cyan bar-graph tachometer" width="1500" height="600" loading="lazy">
+            <img src="images/dash-modern.png" alt="Retro Dash modern cluster with blue ring gauges" width="1500" height="600" loading="lazy">
+          </div>
+        </div>
+        <div class="body">
+          <div class="strip"><span>RETRO DASH</span><span class="num">CH 02</span></div>
+          <div class="tag">Car gauges for your PC</div>
+          <p>A car instrument cluster driven by your computer. CPU load revs the tachometer, network speed moves the speedometer, memory is your fuel, and the odometer counts every megabyte.</p>
+          <ul class="chips"><li>80s digital, analog &amp; modern</li><li>Needle sweep on start</li><li>Warning lamps</li><li>Demo drive</li><li>Shows Retro Radio's song</li></ul>
+          <div class="dl"><a class="key" data-asset="RetroDash-win-x64.zip" href="https://github.com/ryxn3/retro-multy-program/releases/latest/download/RetroDash-win-x64.zip"><span class="led"></span>Direct download</a></div>
+        </div>
+      </article>
+
+      <article class="app plate screws"><i class="s1"></i><i class="s2"></i>
+        <div class="shot"><img src="images/lens.jpg" alt="Retro Lens editor with a list of camera looks grouped by brand" width="1480" height="900" loading="lazy"></div>
+        <div class="body">
+          <div class="strip"><span>RETRO LENS</span><span class="num">CH 03</span></div>
+          <div class="tag">Retro photo &amp; video editor</div>
+          <p>Make photos and videos look like they came from a Nintendo DSi, a Game Boy Camera, a VHS camcorder, Super 8, a Polaroid or an old Sony digicam, with 80+ looks sorted by style and brand.</p>
+          <ul class="chips"><li>80+ looks</li><li>40+ settings</li><li>Fisheye</li><li>VHS &amp; CRT</li><li>Your own presets</li><li>MP4 &amp; GIF export</li></ul>
+          <div class="dl"><a class="key" data-asset="RetroLens-win-x64.zip" href="https://github.com/ryxn3/retro-multy-program/releases/latest/download/RetroLens-win-x64.zip"><span class="led"></span>Direct download</a></div>
+        </div>
+      </article>
+
+      <article class="app plate screws"><i class="s1"></i><i class="s2"></i>
+        <div class="shot"><img src="images/designer.png" alt="Radio Designer with a custom orange radio and its property list" width="1500" height="900" loading="lazy"></div>
+        <div class="body">
+          <div class="strip"><span>RADIO DESIGNER</span><span class="num">CH 04</span></div>
+          <div class="tag">Build your own radio</div>
+          <p>Design a complete custom radio: its size and shape, finish and materials, colors and fonts, the display, and every key and knob. Then install it into Retro Radio in one click.</p>
+          <ul class="chips"><li>Drag &amp; drop layout</li><li>Real lighting preview</li><li>Night view</li><li>19 templates</li><li>Undo</li></ul>
+          <div class="dl"><a class="key" data-asset="RadioDesigner-win-x64.zip" href="https://github.com/ryxn3/retro-multy-program/releases/latest/download/RadioDesigner-win-x64.zip"><span class="led"></span>Direct download</a></div>
+        </div>
+      </article>
+
+      <article class="app plate screws"><i class="s1"></i><i class="s2"></i>
+        <div class="shot"><img src="images/converter.png" alt="Radio Video Converter previewing a video as cyan dots" width="820" height="630" loading="lazy"></div>
+        <div class="body">
+          <div class="strip"><span>VIDEO CONVERTER</span><span class="num">CH 05</span></div>
+          <div class="tag">Videos for the radio display</div>
+          <p>Turn any video into a dot-matrix animation (.rdv) that plays on the radio's display, with a live preview while you tweak framing, brightness and dithering.</p>
+          <ul class="chips"><li>Live preview</li><li>Crop or fit</li><li>Dithering styles</li><li>Uses ffmpeg</li></ul>
+          <div class="dl"><a class="key" data-asset="RadioVideoConverter-win-x64.zip" href="https://github.com/ryxn3/retro-multy-program/releases/latest/download/RadioVideoConverter-win-x64.zip"><span class="led"></span>Direct download</a></div>
+        </div>
+      </article>
+
+      <article class="app plate screws"><i class="s1"></i><i class="s2"></i>
+        <div class="shot">
+          <div class="gallery">
+            <img src="images/garage.jpg" alt="JDM Garage at night with a red and gold dekotora art truck covered in marker lights" width="1500" height="890" loading="lazy">
+            <img src="images/garage-ae86.jpg" alt="JDM Garage with a white and black AE86 under a pink neon sign" width="1500" height="890" loading="lazy">
+            <img src="images/garage-kaido.jpg" alt="JDM Garage at night with a purple bosozoku kaido racer with takeyari exhausts" width="1500" height="890" loading="lazy">
+          </div>
+        </div>
+        <div class="body">
+          <div class="strip"><span>JDM GARAGE</span><span class="num">CH 06</span></div>
+          <div class="tag">Dekotora &amp; JDM car collection</div>
+          <p>Drive through a neon-lit garage of JDM legends and glowing dekotora art trucks. Every vehicle has its own radio fitted, and one press opens Retro Radio in that car's radio.</p>
+          <ul class="chips"><li>13 vehicles</li><li>3 dekotora trucks</li><li>Day &amp; night</li><li>A radio per car</li></ul>
+          <div class="dl"><a class="key" data-asset="JdmGarage-win-x64.zip" href="https://github.com/ryxn3/retro-multy-program/releases/latest/download/JdmGarage-win-x64.zip"><span class="led"></span>Direct download</a></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <div class="label">Install</div>
+    <h2 class="chrome">Up and running in a minute</h2>
+    <div class="steps">
+      <div class="step plate screws"><i class="s1"></i><i class="s2"></i><span class="seg">01</span><h3>Download</h3><p>Get <strong>RetroLauncher-win-x64.zip</strong> with the big button at the top.</p></div>
+      <div class="step plate screws"><i class="s1"></i><i class="s2"></i><span class="seg">02</span><h3>Unzip &amp; open</h3><p>Extract the zip anywhere and open <strong>RetroLauncher.exe</strong>. Nothing else to install.</p></div>
+      <div class="step plate screws"><i class="s1"></i><i class="s2"></i><span class="seg">03</span><h3>Pick programs</h3><p>Press <strong>Install</strong> on the programs you want. The launcher keeps them up to date.</p></div>
+    </div>
+    <div class="warn"><span class="led amber"></span><span>Windows may say "Windows protected your PC" the first time, because the programs aren't code-signed. Click <strong>More info &rarr; Run anyway</strong>.</span></div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="label">FAQ</div>
+    <h2 class="chrome">Questions</h2>
+    <div class="menu plate screws"><i class="s1"></i><i class="s2"></i>
+      <details><summary>IS IT FREE?</summary><p>Yes, all of it.</p></details>
+      <details><summary>WHAT DO I NEED?</summary><p>Windows 10 or 11, 64-bit. Each program is self-contained, so you don't need to install .NET or anything else.</p></details>
+      <details><summary>IS THERE A MAC VERSION?</summary><p>Retro Radio runs on Apple Silicon Macs (M1 and newer): download it from the Retro Radio card. It isn't signed with a paid Apple developer account, so the first time open Terminal and run <code>xattr -dr com.apple.quarantine "/Applications/Retro Radio.app"</code>, then open it normally. The other programs are Windows-only for now.</p></details>
+      <details><summary>HOW DO SPOTIFY &amp; SOUNDCLOUD WORK?</summary><p>Open SETTINGS &rarr; MUSIC SERVICE on the radio and follow the steps to add your own free developer app key, then sign in. Spotify plays through your Spotify app and needs Spotify Premium. Keys and logins are stored encrypted on your PC only.</p></details>
+      <details><summary>WHERE DO THE LYRICS COME FROM?</summary><p>From <a href="https://lrclib.net">LRCLIB</a>, a free, open lyrics database with time-synced lines. Turn them on under SETTINGS &rarr; LYRICS.</p></details>
+      <details><summary>WHY DO THE VIDEO TOOLS ASK FOR FFMPEG?</summary><p>Video work uses ffmpeg, a free tool you can get from <a href="https://ffmpeg.org/download.html">ffmpeg.org</a>. Point the program to <em>ffmpeg.exe</em> once and it remembers.</p></details>
+      <details><summary>DOES ANYTHING GET SENT ANYWHERE?</summary><p>No. The launcher only talks to GitHub to download programs and check for updates. Your music, photos and settings stay on your PC.</p></details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="vt" style="font-size:22px;color:var(--vfd);text-shadow:var(--glow)">RETRO MULTY PROGRAM &middot; MADE FOR FUN</span>
+    <a class="key" href="https://github.com/ryxn3/retro-multy-program"><span class="led"></span>Source &amp; releases</a>
+  </div>
+</footer>
+
+<script>
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const VFD = '#5df2dc', GHOST = 'rgba(93,242,220,0.07)';
+
+  // ── 5x7 dot-matrix title, like the radio's display ──
+  const GLYPHS = {
+    'R': '11110 10001 10001 11110 10100 10010 10001', 'E': '11111 10000 10000 11110 10000 10000 11111',
+    'T': '11111 00100 00100 00100 00100 00100 00100', 'O': '01110 10001 10001 10001 10001 10001 01110',
+    'M': '10001 11011 10101 10101 10001 10001 10001', 'U': '10001 10001 10001 10001 10001 10001 01110',
+    'L': '10000 10000 10000 10000 10000 10000 11111', 'Y': '10001 10001 01010 00100 00100 00100 00100',
+    'P': '11110 10001 10001 11110 10000 10000 10000', 'G': '01110 10001 10000 10111 10001 10001 01111',
+    'A': '01110 10001 10001 11111 10001 10001 10001', ' ': '00000 00000 00000 00000 00000 00000 00000',
+  };
+  (function drawTitle(text) {
+    const c = document.getElementById('dotTitle'), g = c.getContext('2d');
+    const cols = text.length * 6 - 1, pitch = Math.min(c.width / (cols + 2), c.height / 9);
+    const x0 = (c.width - cols * pitch) / 2, y0 = (c.height - 7 * pitch) / 2, d = pitch * 0.78;
+    for (let i = 0; i < text.length; i++) {
+      const rows = (GLYPHS[text[i]] || GLYPHS[' ']).split(' ');
+      for (let r = 0; r < 7; r++) for (let k = 0; k < 5; k++) {
+        const on = rows[r][k] === '1';
+        g.shadowBlur = on ? 14 : 0; g.shadowColor = VFD;
+        g.fillStyle = on ? VFD : GHOST;
+        g.fillRect(x0 + (i * 6 + k) * pitch, y0 + r * pitch, d, d);
+      }
+    }
+  })('RETRO MULTY PROGRAM');
+
+  // ── "attract mode" spectrum, P-TIME counter and a knob that follows the music ──
+  (function spectrum() {
+    const c = document.getElementById('spectrum'), g = c.getContext('2d');
+    const knob = document.getElementById('knob'), ptime = document.getElementById('ptime');
+    const bars = 32, segs = 11, peaks = new Array(bars).fill(0);
+    const start = performance.now();
+    function frame(t) {
+      const s = (t - start) / 1000, bw = c.width / bars, sh = c.height / segs;
+      g.clearRect(0, 0, c.width, c.height);
+      let sum = 0;
+      for (let i = 0; i < bars; i++) {
+        const x = i / (bars - 1);
+        let v = 0.42 + 0.26 * Math.sin(s * 1.9 + i * 0.45) + 0.16 * Math.sin(s * 3.3 - i * 0.9) + 0.1 * Math.sin(s * 7 + i * 2.1);
+        v = Math.max(0.05, Math.min(1, v * (1 - 0.35 * x)));
+        sum += v;
+        peaks[i] = Math.max(v, peaks[i] - 0.006);
+        const lit = Math.round(v * segs), pk = Math.min(segs - 1, Math.round(peaks[i] * segs));
+        for (let k = 0; k < segs; k++) {
+          const on = k < lit || k === pk, y = c.height - (k + 1) * sh;
+          const col = k >= segs - 2 ? '#ff4b3a' : k >= segs - 4 ? '#ffb43c' : VFD;
+          g.shadowBlur = on ? 12 : 0; g.shadowColor = col;
+          g.fillStyle = on ? col : GHOST;
+          g.fillRect(i * bw + bw * 0.14, y + sh * 0.18, bw * 0.72, sh * 0.64);
+        }
+      }
+      knob.style.setProperty('--angle', (-40 + (sum / bars) * 160).toFixed(1) + 'deg');
+      const secs = Math.floor(s);
+      ptime.textContent = `P-TIME ${String(Math.floor(secs / 60)).padStart(2, '0')}'${String(secs % 60).padStart(2, '0')}`;
+      if (!reduceMotion) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
+
+  // ── latest release info from GitHub (the buttons work without it) ──
+  (async function release() {
+    const meta = document.getElementById('releaseMeta');
+    try {
+      const res = await fetch('https://api.github.com/repos/ryxn3/retro-multy-program/releases/latest', { headers: { Accept: 'application/vnd.github+json' } });
+      if (res.status === 404) {
+        meta.innerHTML = '<b>FIRST RELEASE COMING SOON</b> &middot; WATCH THE GITHUB PAGE';
+        return;
+      }
+      if (!res.ok) return;
+      const rel = await res.json();
+      const assets = Object.fromEntries((rel.assets || []).map(a => [a.name, a]));
+      const mb = n => (n / 1048576).toFixed(0) + ' MB';
+      const launcher = assets['RetroLauncher-win-x64.zip'];
+      const date = new Date(rel.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).toUpperCase();
+      meta.innerHTML = `<b>VERSION ${rel.tag_name.replace(/^v/, '')}</b> &middot; ${date}` + (launcher ? ` &middot; ${mb(launcher.size)}` : '') + ' &middot; WINDOWS 10 / 11 (64-BIT)';
+      document.querySelectorAll('a[data-asset]').forEach(a => {
+        const asset = assets[a.dataset.asset];
+        if (asset) a.insertAdjacentHTML('afterend', `<span>${mb(asset.size)}</span>`);
+      });
+    } catch { /* offline or rate-limited: keep the default text */ }
+  })();
+</script>
+</body>
+</html>
