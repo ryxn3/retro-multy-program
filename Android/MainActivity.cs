@@ -27,11 +27,20 @@ public sealed class MainActivity : Activity
     const int PermissionRequest = 1;
 
     internal static RadioForm? Radio;
+    static bool handlersSet;
     RadioView? view;
 
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
+        if (!handlersSet)
+        {
+            // If the radio ever does crash, the error is kept and shown next time, so it can be reported.
+            handlersSet = true;
+            Android.Runtime.AndroidEnvironment.UnhandledExceptionRaiser += (_, e) => AndroidHost.WriteCrash(e.Exception);
+            AppDomain.CurrentDomain.UnhandledException += (_, e) => AndroidHost.WriteCrash(e.ExceptionObject as Exception);
+            TaskScheduler.UnobservedTaskException += (_, e) => e.SetObserved();
+        }
         var host = AndroidHost.Instance;
         host.Activity = this;
         Host.Current = host;
@@ -44,6 +53,7 @@ public sealed class MainActivity : Activity
         if (Radio == null || Radio.IsDisposed)
         {
             Radio = new RadioForm([]);
+            Radio.UsePhoneDefaults(Path.Combine(FilesDir!.AbsolutePath, "phone-defaults"));
             System.Windows.Forms.Application.MainForm = Radio;
         }
         view.Form = Radio;
@@ -51,6 +61,34 @@ public sealed class MainActivity : Activity
         StartPlaybackService();
         AskPermissions();
         HandleIntent(Intent);
+        ShowLastCrash();
+    }
+
+    /// <summary>After a crash: shows what went wrong, with a button to copy it (to send to whoever can fix it).</summary>
+    void ShowLastCrash()
+    {
+        string file = AndroidHost.CrashFile;
+        if (!File.Exists(file)) return;
+        string text;
+        try
+        {
+            text = File.ReadAllText(file);
+            File.Delete(file);
+        }
+        catch (Exception)
+        {
+            return;
+        }
+        new AlertDialog.Builder(this)
+            .SetTitle("Retro Radio stopped last time")!
+            .SetMessage(text.Length > 3000 ? text[..3000] : text)!
+            .SetPositiveButton("Copy error", (_, _) =>
+            {
+                var clip = (Android.Content.ClipboardManager?)GetSystemService(ClipboardService);
+                if (clip != null) clip.PrimaryClip = ClipData.NewPlainText("Retro Radio error", text);
+            })!
+            .SetNegativeButton("Close", (_, _) => { })!
+            .Show();
     }
 
     protected override void OnNewIntent(Intent? intent)

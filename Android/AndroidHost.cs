@@ -25,8 +25,43 @@ sealed class AndroidHost : IAndroidHost
     Context Ctx => (Context?)Activity ?? Android.App.Application.Context;
 
     public bool IsUiThread => Looper.MyLooper() == Looper.MainLooper;
-    public void Post(Action action) => main.Post(action);
-    public void PostDelayed(Action action, int milliseconds) => main.PostDelayed(action, milliseconds);
+    public void Post(Action action) => main.Post(() => Safely(action));
+    public void PostDelayed(Action action, int milliseconds) => main.PostDelayed(() => Safely(action), milliseconds);
+
+    void Safely(Action action)
+    {
+        try { action(); }
+        catch (Exception ex) { Report(ex); }
+    }
+
+    // ───────────────────────────── errors ─────────────────────────────
+
+    /// <summary>Where the last crash is written, to be shown (and copied) the next time the radio starts.</summary>
+    public static string CrashFile => Path.Combine(Android.App.Application.Context.FilesDir!.AbsolutePath, "last-crash.txt");
+
+    long lastToast;
+
+    /// <summary>
+    /// An error inside the radio: it's written down and shown briefly, and the radio carries on
+    /// (on Windows a WinForms error would show a dialog rather than close the program).
+    /// </summary>
+    public void Report(Exception ex)
+    {
+        Android.Util.Log.Error("RetroRadio", ex.ToString());
+        try { File.AppendAllText(Path.Combine(Android.App.Application.Context.FilesDir!.AbsolutePath, "errors.txt"), $"{DateTime.Now:u}\n{ex}\n\n"); }
+        catch (Exception) { }
+        long now = SystemClock.UptimeMillis();
+        if (now - lastToast < 8000 || Activity == null) return;
+        lastToast = now;
+        try { Toast.MakeText(Activity, $"Retro Radio error: {ex.GetType().Name}: {ex.Message}", ToastLength.Long)?.Show(); }
+        catch (Exception) { }
+    }
+
+    public static void WriteCrash(Exception? ex)
+    {
+        try { File.WriteAllText(CrashFile, $"{DateTime.Now:u}\n{ex}"); }
+        catch (Exception) { }
+    }
     public void RequestPaint() => View?.PostInvalidateOnAnimation();
     public void FormResized() => Post(() => View?.FitForm());
 
