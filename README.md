@@ -211,7 +211,9 @@ dotnet publish Android/RetroRadio.Android.csproj -c Release -f net10.0-android
 
 The `.apk` lands in `Android/bin/Release/net10.0-android/publish/`. GitHub Actions
 (`.github/workflows/android.yml`) builds `RetroRadio-android.apk` on every push that touches the radio,
-keeps it as a download on the run's page, and attaches it to every published release. To install it, copy
+keeps it as a download on the run's page, publishes the newest build of the main branch to the
+`android-latest` pre-release (github.com/ryxn3/retro-multy-program/releases/tag/android-latest), and
+attaches it to every published release. To install it, copy
 it to the phone, open it and allow installing from that app. Like on a Mac, the visualizer can't hear
 Spotify's audio (Android apps can't listen to other apps), so it animates by itself while Spotify plays.
 
