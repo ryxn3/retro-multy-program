@@ -24,6 +24,10 @@ sealed class RadioView : View
 {
     const int LongPressMs = 450, DoubleTapMs = 350;
 
+    // The radio is drawn in software: at most this many pixels, then scaled up by the phone's graphics chip.
+    // Full resolution on a 2400-pixel-wide phone made it slow to start and hot to hold.
+    const int MaxRenderWidth = 1440, MaxRenderHeight = 900;
+
     RadioForm? form;
     ABitmap? frame;
     readonly APaint scaler = new() { FilterBitmap = true, AntiAlias = false };
@@ -71,8 +75,11 @@ sealed class RadioView : View
         if (form == null || w <= 0 || h <= 0) return;
         if (!created)
         {
+            // Start at the size that fits, so the faceplate is rendered once, not once too big and again.
             created = true;
-            form.Create((int)Math.Round(96 * density));
+            var s96 = form.SizeAt96();
+            double k = Math.Min(Math.Min(w, MaxRenderWidth) / s96.Width, Math.Min(h, MaxRenderHeight) / s96.Height);
+            form.Create(Math.Clamp((int)Math.Floor(96 * k), 24, 2000));
         }
         FitForm();
     }
@@ -86,8 +93,8 @@ sealed class RadioView : View
         if (form == null || !created || Width <= 0 || Height <= 0) return;
         var cs = form.ClientSize;
         if (cs.Width <= 0 || cs.Height <= 0) return;
-        double k = Math.Min((double)Width / cs.Width, (double)Height / cs.Height);
-        if (Math.Abs(k - 1) < 0.01) return;
+        double k = Math.Min((double)Math.Min(Width, MaxRenderWidth) / cs.Width, (double)Math.Min(Height, MaxRenderHeight) / cs.Height);
+        if (Math.Abs(k - 1) < 0.02) return;
         int dpi = (int)Math.Floor(form.DeviceDpi * k);
         form.SetDpi(Math.Clamp(dpi, 24, 2000));
         Invalidate();
@@ -102,37 +109,45 @@ sealed class RadioView : View
         var cs = form.ClientSize;
         if (cs.Width <= 0 || cs.Height <= 0) return;
 
+        var (all, rect) = form.TakeDirty();
         if (frame == null || frame.Width != cs.Width || frame.Height != cs.Height)
         {
             frame?.Recycle();
             frame?.Dispose();
             frame = ABitmap.CreateBitmap(cs.Width, cs.Height, ABitmap.Config.Argb8888!);
+            all = true;
         }
 
-        IntPtr pixels = frame.LockPixels();
-        try
+        // Only what changed is repainted (usually just the display); the rest of the picture stays as it was.
+        if (all || !rect.IsEmpty)
         {
-            var info = new SKImageInfo(cs.Width, cs.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
-            using var surface = SKSurface.Create(info, pixels, frame.RowBytes);
-            var c = surface.Canvas;
-            c.Clear(SKColors.Black);
-            using (var g = new Graphics(c, false))
+            IntPtr pixels = frame!.LockPixels();
+            try
             {
-                try { form.RaisePaint(g); }
-                catch (Exception ex) { Android.Util.Log.Error("RetroRadio", ex.ToString()); }
-            }
-            if (form.Region?.Path is { } shape)
-            {
-                // Outside the radio's outline is the black screen, not whatever was drawn there.
-                c.ResetMatrix();
-                c.ClipPath(shape, SKClipOperation.Difference, true);
+                var info = new SKImageInfo(cs.Width, cs.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
+                using var surface = SKSurface.Create(info, pixels, frame.RowBytes);
+                var c = surface.Canvas;
+                var clip = all ? new System.Drawing.Rectangle(0, 0, cs.Width, cs.Height) : rect;
+                c.ClipRect(new SKRect(clip.Left, clip.Top, clip.Right, clip.Bottom));
                 c.Clear(SKColors.Black);
+                using (var g = new Graphics(c, false))
+                {
+                    try { form.RaisePaint(g, clip); }
+                    catch (Exception ex) { AndroidHost.Instance.Report(ex); }
+                }
+                if (form.Region?.Path is { } shape)
+                {
+                    // Outside the radio's outline is the black screen, not whatever was drawn there.
+                    c.ResetMatrix();
+                    c.ClipPath(shape, SKClipOperation.Difference, true);
+                    c.Clear(SKColors.Black);
+                }
+                c.Flush();
             }
-            c.Flush();
-        }
-        finally
-        {
-            frame.UnlockPixels();
+            finally
+            {
+                frame.UnlockPixels();
+            }
         }
 
         // Fit into what the keyboard leaves free (the radio shrinks a little while typing).
@@ -152,6 +167,12 @@ sealed class RadioView : View
     DPoint ToForm(float x, float y) => new((int)Math.Round((x - offX) / scale), (int)Math.Round((y - offY) / scale));
 
     public override bool OnTouchEvent(MotionEvent? e)
+    {
+        try { return Touch(e); }
+        catch (Exception ex) { AndroidHost.Instance.Report(ex); return true; }
+    }
+
+    bool Touch(MotionEvent? e)
     {
         if (e == null || form == null || !created) return false;
         // A real mouse (a Chromebook, DeX, a USB mouse) is a mouse: right button included.
@@ -175,7 +196,11 @@ sealed class RadioView : View
                 else
                 {
                     long downAt = e.DownTime;
-                    PostDelayed(() => LongPress(downAt), LongPressMs);
+                    PostDelayed(() =>
+                    {
+                        try { LongPress(downAt); }
+                        catch (Exception ex) { AndroidHost.Instance.Report(ex); }
+                    }, LongPressMs);
                 }
                 break;
 
@@ -293,6 +318,12 @@ sealed class RadioView : View
 
     public override bool OnKeyDown(Keycode keyCode, KeyEvent? e)
     {
+        try { return Key(keyCode, e); }
+        catch (Exception ex) { AndroidHost.Instance.Report(ex); return true; }
+    }
+
+    bool Key(Keycode keyCode, KeyEvent? e)
+    {
         if (form == null || !created || e == null) return base.OnKeyDown(keyCode, e);
         var key = Map(keyCode);
         if (key == Keys.None && e.UnicodeChar == 0) return base.OnKeyDown(keyCode, e);
@@ -310,7 +341,8 @@ sealed class RadioView : View
 
     public void SendKey(Keys key)
     {
-        if (form != null && created) form.RaiseKeyDown(key);
+        try { if (form != null && created) form.RaiseKeyDown(key); }
+        catch (Exception ex) { AndroidHost.Instance.Report(ex); }
     }
 
     static Keys Map(Keycode k) => k switch

@@ -16,7 +16,11 @@ sealed partial class RadioForm : Form
 {
     // Everything is laid out in these logical units and scaled by the DPI factor S.
     const float GH = 262;
+#if ANDROID
+    const int DispSS = 1; // phone screens are sharp enough, and drawing twice the pixels made phones hot
+#else
     const int DispSS = 2;
+#endif
 
     // Display-local layout.
     const float ProgressY = 214;

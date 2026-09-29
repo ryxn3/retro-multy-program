@@ -368,6 +368,11 @@ namespace System.Drawing
                     _ => scale < 0.6f ? SKFilterQuality.Medium : SKFilterQuality.Low,
                 },
             };
+#if ANDROID
+            // Mipmaps and bicubic filtering cost a phone a lot every frame (the display is redrawn each time);
+            // at about the same size or enlarged (the display's soft glow) plain bilinear looks the same.
+            if (p.FilterQuality > SKFilterQuality.Low && scale >= 0.9f) p.FilterQuality = SKFilterQuality.Low;
+#endif
             if (attr?.Matrix != null)
             {
                 if (attr.Matrix.IsAlphaOnly(out float a)) p.Color = SKColors.White.WithAlpha((byte)Math.Clamp(a * 255, 0, 255));

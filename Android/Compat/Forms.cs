@@ -228,7 +228,7 @@ namespace System.Windows.Forms
 
         public void Focus() { }
         public virtual void Invalidate() { }
-        public void Invalidate(Rectangle r) => Invalidate();
+        public virtual void Invalidate(Rectangle r) => Invalidate();
         public void Invalidate(Region r) => Invalidate();
         public void Refresh() => Invalidate();
         public void Update() { }
@@ -247,6 +247,8 @@ namespace System.Windows.Forms
         ControlStyles styles;
         bool created, shown, closing;
         int dpi = 96;
+        bool dirtyAll = true;
+        Rectangle dirty;
 
         internal static Point LastTouch;
 
@@ -338,7 +340,24 @@ namespace System.Windows.Forms
 
         public override void Invalidate()
         {
+            dirtyAll = true;
             if (created) Host.Current.RequestPaint();
+        }
+
+        /// <summary>Only this part changed: the next frame repaints just that (a phone has no power to spare).</summary>
+        public override void Invalidate(Rectangle r)
+        {
+            if (!dirtyAll) dirty = dirty.IsEmpty ? r : Rectangle.Union(dirty, r);
+            if (created) Host.Current.RequestPaint();
+        }
+
+        /// <summary>What needs repainting since the last frame: everything, or one rectangle (empty = nothing).</summary>
+        internal (bool All, Rectangle Rect) TakeDirty()
+        {
+            var result = (dirtyAll, Rectangle.Intersect(dirty, ClientRectangle));
+            dirtyAll = false;
+            dirty = Rectangle.Empty;
+            return result;
         }
 
         public IAsyncResult? BeginInvoke(Action action)
@@ -455,9 +474,11 @@ namespace System.Windows.Forms
             Invalidate();
         }
 
-        internal void RaisePaint(Graphics g)
+        internal void RaisePaint(Graphics g) => RaisePaint(g, ClientRectangle);
+
+        internal void RaisePaint(Graphics g, Rectangle clip)
         {
-            var e = new PaintEventArgs(g, ClientRectangle);
+            var e = new PaintEventArgs(g, clip);
             OnPaintBackground(e);
             OnPaint(e);
         }
