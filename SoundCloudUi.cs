@@ -236,6 +236,23 @@ sealed partial class RadioForm
 
     Task SetUpKeysAsync()
     {
+#if ANDROID
+        // Android has no WinForms dialogs: the phone asks with its own text fields.
+        string[] fields = svc.NeedsSecret ? ["Client ID", "Client Secret"] : ["Client ID"];
+        Droid.Host.Current.AskText(svc.NeedsSecret ? "SoundCloud app keys" : "Spotify app key",
+            $"{svc.SetupHelp}\n\n{svc.AppsUrl}\n\nRedirect URI: {OAuthLoopback.RedirectUri}", fields, [svc.ClientId, ""], values =>
+            {
+                if (values[0].Trim().Length == 0 || (svc.NeedsSecret && values[1].Trim().Length == 0))
+                {
+                    Flash(svc.NeedsSecret ? "ENTER CLIENT ID AND SECRET" : "ENTER THE CLIENT ID", 2.5);
+                    return;
+                }
+                svc.SetKeys(values[0], svc.NeedsSecret ? values[1] : "");
+                Flash("KEYS SAVED");
+                ShowScMenu();
+            });
+        return Task.CompletedTask;
+#else
         using var dlg = new SoundCloudKeysDialog(svc);
         if (dlg.ShowDialog(this) == DialogResult.OK)
         {
@@ -244,6 +261,7 @@ sealed partial class RadioForm
         }
         ShowScMenu();
         return Task.CompletedTask;
+#endif
     }
 
     async Task SignInAsync()
@@ -545,6 +563,7 @@ sealed partial class RadioForm
     }
 }
 
+#if !ANDROID
 /// <summary>One-time setup: the user's own app credentials for SoundCloud or Spotify.</summary>
 sealed class SoundCloudKeysDialog : Form
 {
@@ -579,7 +598,7 @@ sealed class SoundCloudKeysDialog : Form
             AutoSize = true,
             LinkColor = Color.FromArgb(110, 235, 255),
         };
-        link.LinkClicked += (_, _) => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(link.Text) { UseShellExecute = true });
+        link.LinkClicked += (_, _) => OAuthLoopback.OpenInBrowser(link.Text);
 
         var lblRedirect = new Label { Text = "Redirect URI", Location = new Point(14, 138), AutoSize = true };
         var txtRedirect = new TextBox { Text = OAuthLoopback.RedirectUri, ReadOnly = true, Location = new Point(120, 135), Width = 386 };
@@ -629,3 +648,4 @@ sealed class SoundCloudKeysDialog : Form
         ClassicFrame.Apply(this);
     }
 }
+#endif

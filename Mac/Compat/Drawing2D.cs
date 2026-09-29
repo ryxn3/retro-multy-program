@@ -497,13 +497,13 @@ namespace System.Drawing.Drawing2D
             if (InterpolationColors is { Colors.Length: >= 2 } ic)
             {
                 // GDI+ counts these from the edge (0) to the centre (1).
-                colors = ic.Colors.Reverse().Select(Sk.C).ToArray();
-                pos = ic.Positions.Reverse().Select(p => 1 - p).ToArray();
+                colors = Enumerable.Reverse(ic.Colors).Select(Sk.C).ToArray();
+                pos = Enumerable.Reverse(ic.Positions).Select(p => 1 - p).ToArray();
             }
             else if (Blend is { Factors.Length: >= 2 } bl)
             {
-                colors = bl.Factors.Reverse().Select(f => Sk.C(Mix(edge, CenterColor, f))).ToArray();
-                pos = bl.Positions.Reverse().Select(p => 1 - p).ToArray();
+                colors = Enumerable.Reverse(bl.Factors).Select(f => Sk.C(Mix(edge, CenterColor, f))).ToArray();
+                pos = Enumerable.Reverse(bl.Positions).Select(p => 1 - p).ToArray();
             }
             else
             {

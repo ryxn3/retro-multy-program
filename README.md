@@ -186,6 +186,37 @@ The app isn't signed with an Apple developer ID, so the first time run
 `xattr -dr com.apple.quarantine "/Applications/Retro Radio.app"` (also in the zip's HOW TO OPEN.txt).
 On a Mac the visualizer can't hear Spotify's audio, so it animates by itself while Spotify plays.
 
+## Retro Radio for Android
+
+`Android/` builds Retro Radio for Android phones and tablets (Android 8 or newer) from the same source
+files, the same way as the Mac version: System.Drawing comes from the Mac port's SkiaSharp look-alike, and
+`Android/Compat` has small Android stand-ins for WinForms and NAudio's output (sound through AudioTrack; MP3
+via NLayer, FLAC/M4A/AAC/OGG/Opus via Android's own decoders). All radio models, visualizers, settings,
+sounds, internet radio, SoundCloud/Spotify and lyrics are there.
+
+- The radio fills the screen in landscape. Tap the keys; drag the VOLUME and SPEED knobs up and down.
+- Menus and lists on the display (LIST, SETTINGS, EQ, SoundCloud): tap a row, **swipe** to scroll, tap twice
+  to play, **hold** for a right-click (go back / step a setting the other way). The phone's **Back** is Esc.
+- OPEN and FOLDER use the phone's file picker; the first time, the phone's Music folder is added
+  automatically (after you allow access to music). You can also "Open with" Retro Radio from a file manager.
+- The music keeps playing in the background (a notification shows while the radio is on). **POWER** turns
+  it off; Back on the main screen just sends it to the background.
+- Headset and car buttons (play/pause, next, previous) work; the phone's volume keys set the phone's volume.
+
+Build it with the .NET 10 SDK and the Android workload (`dotnet workload install android`):
+
+```
+dotnet publish Android/RetroRadio.Android.csproj -c Release -f net10.0-android
+```
+
+The `.apk` lands in `Android/bin/Release/net10.0-android/publish/`. GitHub Actions
+(`.github/workflows/android.yml`) builds `RetroRadio-android.apk` on every push that touches the radio,
+keeps it as a download on the run's page, publishes the newest build of the main branch to the
+`android-latest` pre-release (github.com/ryxn3/retro-multy-program/releases/tag/android-latest), and
+attaches it to every published release. To install it, copy
+it to the phone, open it and allow installing from that app. Like on a Mac, the visualizer can't hear
+Spotify's audio (Android apps can't listen to other apps), so it animates by itself while Spotify plays.
+
 ## Website
 
 `docs/` is the download site (hosted with GitHub Pages). On GitHub: **Settings → Pages → Build and

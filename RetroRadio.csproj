@@ -49,6 +49,9 @@
     <Compile Remove="Mac\**" />
     <None Remove="Mac\**" />
     <EmbeddedResource Remove="Mac\**" />
+    <Compile Remove="Android\**" />
+    <None Remove="Android\**" />
+    <EmbeddedResource Remove="Android\**" />
     <None Remove="dist\**" />
   </ItemGroup>
 

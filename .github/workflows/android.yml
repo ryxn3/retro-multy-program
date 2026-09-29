@@ -1,0 +1,88 @@
+# Builds Retro Radio for Android (RetroRadio-android.apk). Every run keeps the .apk as a download on the
+# run's page; builds of the main branch also go to the "android-latest" pre-release (a download link that
+# always has the newest .apk), and publishing a GitHub release attaches it to the release.
+#
+# Signing: without secrets the .apk is signed with a throwaway key, so a newer build only installs over an
+# older one after uninstalling. For updates that install in place, add these repository secrets:
+#   ANDROID_KEYSTORE           the .keystore file, base64-encoded
+#   ANDROID_KEYSTORE_PASSWORD  its password (also used for the key)
+#   ANDROID_KEY_ALIAS          the key's alias
+name: Android
+
+on:
+  push:
+    paths: ['*.cs', 'Android/**', 'Mac/Compat/**', 'Sounds/**', '.github/workflows/android.yml']
+  pull_request:
+    paths: ['*.cs', 'Android/**', 'Mac/Compat/**', 'Sounds/**', '.github/workflows/android.yml']
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: microsoft
+          java-version: 17
+
+      - name: Install the .NET Android workload
+        run: dotnet workload install android
+
+      - name: Signing key
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [ -n "$KEYSTORE" ]; then
+            echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/retroradio.keystore"
+            {
+              echo "SIGN_ARGS=-p:AndroidKeyStore=true -p:AndroidSigningKeyStore=$RUNNER_TEMP/retroradio.keystore -p:AndroidSigningKeyAlias=$KEY_ALIAS -p:AndroidSigningKeyPass=env:KEYSTORE_PASSWORD -p:AndroidSigningStorePass=env:KEYSTORE_PASSWORD"
+            } >> "$GITHUB_ENV"
+          fi
+
+      - name: Build the APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          [[ "$GITHUB_REF_TYPE" == "tag" && "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || VERSION=1.0.0
+          dotnet publish Android/RetroRadio.Android.csproj -c Release -f net10.0-android \
+            -p:AndroidSdkDirectory="$ANDROID_HOME" -p:AcceptAndroidSDKLicenses=true \
+            -p:ApplicationDisplayVersion="$VERSION" -p:ApplicationVersion="$GITHUB_RUN_NUMBER" \
+            $SIGN_ARGS -o out
+          cp out/*-Signed.apk RetroRadio-android.apk
+          ls -la RetroRadio-android.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RetroRadio-android
+          path: RetroRadio-android.apk
+
+      - name: Publish the latest build
+        if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view android-latest > /dev/null 2>&1; then
+            gh release create android-latest --prerelease --target "$GITHUB_SHA" --title "Retro Radio for Android (latest build)" \
+              --notes "The newest Retro Radio for Android, built from the main branch. Download RetroRadio-android.apk, open it on the phone and allow installing it."
+          fi
+          gh release upload android-latest RetroRadio-android.apk --clobber
+
+      - name: Attach to the release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" RetroRadio-android.apk --clobber
