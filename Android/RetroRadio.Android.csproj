@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Retro Radio for Android: the same radio code as Windows and Mac. System.Drawing comes from the Mac
+    port's SkiaSharp look-alike (Mac/Compat), WinForms and NAudio's output from small Android stand-ins
+    (Android/Compat). MAC marks the portable, non-Windows build in the shared code; ANDROID the phone.
+      dotnet workload install android
+      dotnet publish Android/RetroRadio.Android.csproj -c Release -f net8.0-android
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>26</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>RetroRadio</AssemblyName>
+    <RootNamespace>RetroRadio</RootNamespace>
+    <ApplicationId>io.github.ryxn3.retroradio</ApplicationId>
+    <ApplicationTitle>Retro Radio</ApplicationTitle>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
+    <DefineConstants>$(DefineConstants);MAC;ANDROID</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);CS0436;CA1416;CA1422;XA4218</NoWarn>
+    <!-- One .apk to install by hand, for phones (arm64, older arm) and emulators/Chromebooks (x64). -->
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <RuntimeIdentifiers>android-arm64;android-arm;android-x64</RuntimeIdentifiers>
+    <!-- Radio designs and settings are JSON read by reflection; only .NET's own libraries are trimmed. -->
+    <TrimMode>partial</TrimMode>
+    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="System.Drawing" />
+    <Using Include="System.Windows.Forms" />
+    <Compile Include="..\*.cs" Exclude="..\Program.cs;..\ClassicFrame.cs" LinkBase="Shared" />
+    <Compile Include="..\Mac\Compat\Drawing.cs;..\Mac\Compat\Drawing2D.cs;..\Mac\Compat\Graphics.cs;..\Mac\Compat\IconGlyphs.cs;..\Mac\Compat\Platform.cs" LinkBase="Compat" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio.Core" Version="2.2.1" />
+    <PackageReference Include="NLayer.NAudioSupport" Version="1.4.0" />
+    <PackageReference Include="SkiaSharp" Version="2.88.9" />
+    <PackageReference Include="TagLibSharp" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\Sounds\*.mp3" LogicalName="%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\Sounds\voice\*.mp3" LogicalName="voice_%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

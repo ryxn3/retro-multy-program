@@ -1844,6 +1844,15 @@ sealed partial class RadioForm : Form
             Title = "Pick a startup sound",
             Filter = "Audio files|" + string.Join(";", AudioExt.Select(e => "*" + e)) + "|All files|*.*",
         };
+#if ANDROID
+        // The phone's picker answers later.
+        dlg.Picked = files =>
+        {
+            customSound = files[0];
+            startupSound = Chimes.Custom;
+            PlayStartupSound();
+        };
+#endif
         if (dlg.ShowDialog(this) != DialogResult.OK) return false;
         customSound = dlg.FileName;
         startupSound = Chimes.Custom;

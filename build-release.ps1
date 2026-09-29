@@ -45,5 +45,18 @@ dotnet run --project (Join-Path $root "Mac\Packager") -v quiet -- $macOut (Join-
     (Join-Path $dist "RetroRadio-macOS-arm64.zip") $Version (Join-Path $root "Demo - Game of Life.rdv")
 if ($LASTEXITCODE -ne 0) { throw "Packaging the Mac app failed." }
 
+# Retro Radio for Android (only when the Android workload is installed: dotnet workload install android).
+if ((dotnet workload list) -match "\bandroid\b") {
+    Write-Host "Publishing Retro Radio for Android..." -ForegroundColor Cyan
+    $apkOut = Join-Path $dist "build\android"
+    dotnet publish (Join-Path $root "Android\RetroRadio.Android.csproj") -c Release -f net8.0-android `
+        -p:ApplicationDisplayVersion=$Version -o $apkOut --nologo -v quiet
+    if ($LASTEXITCODE -ne 0) { throw "Publishing the Android version failed." }
+    Copy-Item (Get-ChildItem $apkOut -Filter "*-Signed.apk" | Select-Object -First 1).FullName (Join-Path $dist "RetroRadio-android.apk")
+    Write-Host "  -> dist\RetroRadio-android.apk" -ForegroundColor Green
+} else {
+    Write-Host "Skipping Android (no Android workload; GitHub Actions builds the .apk for releases)." -ForegroundColor DarkYellow
+}
+
 Remove-Item -Recurse -Force (Join-Path $dist "build")
 Write-Host "`nDone. Upload everything in .\dist to a GitHub release tagged v$Version." -ForegroundColor Yellow

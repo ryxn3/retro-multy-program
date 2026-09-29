@@ -27,6 +27,16 @@ static class OAuthLoopback
         return (verifier, challenge, Base64Url(RandomNumberGenerator.GetBytes(16)));
     }
 
+    /// <summary>Opens a web page in the default browser.</summary>
+    public static void OpenInBrowser(string url)
+    {
+#if ANDROID
+        Droid.Host.Current.OpenUrl(url);
+#else
+        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+#endif
+    }
+
     /// <summary>Opens the login page in the browser and waits for the redirect. Returns the authorization code.</summary>
     public static async Task<string> AuthorizeAsync(string authorizeUrl, string state, CancellationToken ct)
     {
@@ -41,7 +51,7 @@ static class OAuthLoopback
         }
         try
         {
-            Process.Start(new ProcessStartInfo(authorizeUrl) { UseShellExecute = true });
+            OpenInBrowser(authorizeUrl);
             return await WaitForCallbackAsync(listener, state, ct);
         }
         finally

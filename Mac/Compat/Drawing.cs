@@ -321,7 +321,7 @@ namespace System.Drawing
         public void Dispose() { }
     }
 
-    /// <summary>Maps the Windows font names the app uses to fonts every Mac has.</summary>
+    /// <summary>Maps the Windows font names the app uses to fonts every Mac (and Android phone) has.</summary>
     internal static class FontMap
     {
         static readonly Dictionary<(string, FontStyle), SKTypeface> cache = [];
@@ -355,14 +355,14 @@ namespace System.Drawing
             var fs = new SKFontStyle(weight, (int)width, slant);
 
             string[] candidates =
-                n.StartsWith("segoe ui symbol") || n.StartsWith("segoe ui emoji") ? ["Segoe UI Symbol", "Apple Symbols", "Apple Color Emoji", "Helvetica Neue"]
-                : n.StartsWith("segoe") ? ["Segoe UI", "Helvetica Neue", "Helvetica", "Arial"]
-                : n.StartsWith("bahnschrift") ? [name, "Bahnschrift", "DIN Alternate", "DIN Condensed", "Avenir Next Condensed", "Helvetica Neue"]
-                : n.StartsWith("consolas") ? ["Consolas", "Menlo", "Monaco", "Courier New"]
-                : n.StartsWith("ms gothic") || n.StartsWith("yu gothic") || n.StartsWith("meiryo") ? ["MS Gothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Osaka", "PingFang SC"]
-                : n.StartsWith("malgun") || n.StartsWith("gulim") ? ["Malgun Gothic", "Apple SD Gothic Neo", "AppleGothic"]
-                : n.StartsWith("arial black") ? ["Arial Black", "Helvetica Neue"]
-                : [name, "Helvetica Neue", "Arial"];
+                n.StartsWith("segoe ui symbol") || n.StartsWith("segoe ui emoji") ? ["Segoe UI Symbol", "Apple Symbols", "Apple Color Emoji", "Helvetica Neue", "Noto Color Emoji", "sans-serif"]
+                : n.StartsWith("segoe") ? ["Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"]
+                : n.StartsWith("bahnschrift") ? [name, "Bahnschrift", "DIN Alternate", "DIN Condensed", "Avenir Next Condensed", "Helvetica Neue", "sans-serif-condensed"]
+                : n.StartsWith("consolas") ? ["Consolas", "Menlo", "Monaco", "Courier New", "monospace"]
+                : n.StartsWith("ms gothic") || n.StartsWith("yu gothic") || n.StartsWith("meiryo") ? ["MS Gothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Osaka", "PingFang SC", "Noto Sans CJK JP", "sans-serif"]
+                : n.StartsWith("malgun") || n.StartsWith("gulim") ? ["Malgun Gothic", "Apple SD Gothic Neo", "AppleGothic", "Noto Sans CJK KR", "sans-serif"]
+                : n.StartsWith("arial black") ? ["Arial Black", "Helvetica Neue", "sans-serif-black", "sans-serif"]
+                : [name, "Helvetica Neue", "Arial", "sans-serif"];
             foreach (var c in candidates)
             {
                 var tf = SKFontManager.Default.MatchFamily(c, fs);
