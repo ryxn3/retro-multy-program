@@ -49,7 +49,7 @@ if ($LASTEXITCODE -ne 0) { throw "Packaging the Mac app failed." }
 if ((dotnet workload list) -match "\bandroid\b") {
     Write-Host "Publishing Retro Radio for Android..." -ForegroundColor Cyan
     $apkOut = Join-Path $dist "build\android"
-    dotnet publish (Join-Path $root "Android\RetroRadio.Android.csproj") -c Release -f net8.0-android `
+    dotnet publish (Join-Path $root "Android\RetroRadio.Android.csproj") -c Release -f net10.0-android `
         -p:ApplicationDisplayVersion=$Version -o $apkOut --nologo -v quiet
     if ($LASTEXITCODE -ne 0) { throw "Publishing the Android version failed." }
     Copy-Item (Get-ChildItem $apkOut -Filter "*-Signed.apk" | Select-Object -First 1).FullName (Join-Path $dist "RetroRadio-android.apk")

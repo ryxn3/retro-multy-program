@@ -203,13 +203,13 @@ sounds, internet radio, SoundCloud/Spotify and lyrics are there.
   it off; Back on the main screen just sends it to the background.
 - Headset and car buttons (play/pause, next, previous) work; the phone's volume keys set the phone's volume.
 
-Build it with the .NET 8 SDK and the Android workload (`dotnet workload install android`):
+Build it with the .NET 10 SDK and the Android workload (`dotnet workload install android`):
 
 ```
-dotnet publish Android/RetroRadio.Android.csproj -c Release -f net8.0-android
+dotnet publish Android/RetroRadio.Android.csproj -c Release -f net10.0-android
 ```
 
-The `.apk` lands in `Android/bin/Release/net8.0-android/publish/`. GitHub Actions
+The `.apk` lands in `Android/bin/Release/net10.0-android/publish/`. GitHub Actions
 (`.github/workflows/android.yml`) builds `RetroRadio-android.apk` on every push that touches the radio,
 keeps it as a download on the run's page, and attaches it to every published release. To install it, copy
 it to the phone, open it and allow installing from that app. Like on a Mac, the visualizer can't hear
